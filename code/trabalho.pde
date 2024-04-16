@@ -1,0 +1,152 @@
+int[][] grid;
+int r = 11, c = 11; //Tamanho da grid
+int time = 0, frame = 5;
+int vel = 1;
+float l, h; //Tamanho de cada espaço
+cPlayer jogador;
+cItem item;
+boolean contaFinalizada = false, contando = false;
+//1 Grama
+//2 Árvore
+
+
+
+
+int[][] criarGrid() {
+  int[][] aux = new int[r][c];
+  for (int x = 0; x < r; ++x) {
+    for (int y = 0; y < c; ++y) {
+      aux[x][y] = random(1)<.9 ? 1 : 2;
+    }
+  }
+  return aux;
+}
+
+
+int valorAleatorio() {
+  return ceil(random(10));
+}
+
+PVector posicaoAleatoria() {
+  return new PVector(floor(random(r)), floor(random(c)));
+}
+
+
+
+void conta() {
+  long inicio = millis();
+  long fim = 0;
+  contando = true;
+  do {
+    fim = millis();
+  } while (fim-inicio<10000);
+  contando = false;
+  contaFinalizada = true;
+}
+
+void showGrid() {
+  for (int x = 0; x < r; ++x) {
+    for (int y = 0; y < c; ++y) {
+      strokeWeight(5);
+      stroke(#446C23);
+      fill(#72F08E);
+      if (grid[x][y]==2) fill(#59B410);
+      rect(x*l, y*h, l, h);
+    }
+  }
+}
+
+
+
+//Movimentação
+void keyPressed() {
+  switch(key) {
+  case 'd':
+    jogador.right = true;
+    break;
+  case 'a':
+    jogador.left = true;
+    break;
+  case 'w':
+    jogador.up = true;
+    break;
+  case 's':
+    jogador.down = true;
+    break;
+  }
+  switch(keyCode) {
+  case RIGHT:
+    jogador.right = true;
+    break;
+  case LEFT:
+    jogador.left = true;
+    break;
+  case UP:
+    jogador.up = true;
+    break;
+  case DOWN:
+    jogador.down = true;
+    break;
+  }
+}
+
+void keyReleased() {
+  switch(key) {
+  case 'd':
+    jogador.right = false;
+    break;
+  case 'a':
+    jogador.left = false;
+    break;
+  case 'w':
+    jogador.up = false;
+    break;
+  case 's':
+    jogador.down = false;
+    break;
+  }
+  switch(keyCode) {
+  case RIGHT:
+    jogador.right = false;
+    break;
+  case LEFT:
+    jogador.left = false;
+    break;
+  case UP:
+    jogador.up = false;
+    break;
+  case DOWN:
+    jogador.down = false;
+    break;
+  }
+}
+
+void setup() {
+  size(500, 500);
+  l = width/(float)r;
+  h = height/(float)c;
+  grid = criarGrid();
+  jogador = new cPlayer(new PVector(floor(r/2), floor(c/2)));
+  item = new cItem(posicaoAleatoria(), valorAleatorio());
+}
+
+void draw() {
+  background(255);
+  showGrid();
+  if (time%frame==0) jogador.update();
+
+  if (!contando) {
+    thread("conta");
+  }
+
+  if (contaFinalizada) {
+    println("ok");
+    item.geraItem();
+    contaFinalizada = false;
+  }
+
+  item.showItem();
+  jogador.showPlayer();
+  ++time;
+  //if(mousePressed) setup();
+}
