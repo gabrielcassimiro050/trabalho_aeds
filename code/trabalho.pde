@@ -1,11 +1,11 @@
 int[][] grid;
-int r = 11, c = 11; //Tamanho da grid
+int r = 100, c = 100; //Tamanho da grid
 int time = 0, frame = 5;
-int vel = 1;
 float l, h; //Tamanho de cada espaço
 cPlayer jogador;
 cItem item;
-boolean contaFinalizada = false, contando = false;
+cContador contador;
+boolean contando, contaFinalizada;
 //1 Grama
 //2 Árvore
 
@@ -33,22 +33,18 @@ PVector posicaoAleatoria() {
 
 
 
-void conta() {
-  long inicio = millis();
-  long fim = 0;
-  contando = true;
-  do {
-    fim = millis();
-  } while (fim-inicio<10000);
-  contando = false;
-  contaFinalizada = true;
+
+void contar(int tempo) {
+  contador = new cContador(tempo); //Criar um objeto da classe cContador
+  new Thread(contador).start(); //Engloba o objeto em uma thread
 }
 
 void showGrid() {
   for (int x = 0; x < r; ++x) {
     for (int y = 0; y < c; ++y) {
-      strokeWeight(5);
-      stroke(#446C23);
+      noStroke();
+      //strokeWeight(1);
+      //stroke(#446C23);
       fill(#72F08E);
       if (grid[x][y]==2) fill(#59B410);
       rect(x*l, y*h, l, h);
@@ -128,6 +124,7 @@ void setup() {
   grid = criarGrid();
   jogador = new cPlayer(new PVector(floor(r/2), floor(c/2)));
   item = new cItem(posicaoAleatoria(), valorAleatorio());
+  contador = new cContador(0);
 }
 
 void draw() {
@@ -136,11 +133,10 @@ void draw() {
   if (time%frame==0) jogador.update();
 
   if (!contando) {
-    thread("conta");
+    contar(10);
   }
 
   if (contaFinalizada) {
-    println("ok");
     item.geraItem();
     contaFinalizada = false;
   }
