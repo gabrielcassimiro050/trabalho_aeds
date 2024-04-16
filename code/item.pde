@@ -23,8 +23,8 @@ class cItem {
 
   void geraItem() {
     PVector aux = posicaoAleatoria();
-    println("novo item");
-    while (grid[(int)aux.x][(int)aux.y]!=1 && jogador.pos==aux) {
+    //println("novo item");
+    while (grid[(int)aux.x][(int)aux.y]!=1 && jogador.pos.x==aux.x && jogador.pos.y==aux.y) {
       aux = posicaoAleatoria();
     }
     pos = aux;
