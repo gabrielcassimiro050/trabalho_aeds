@@ -3,7 +3,9 @@ class cItem {
   int valor;
   color c;
   color[] cores = {#6F441C, #A5A4A3, #FFF750, #ED0A0A, #FC9103, #9002F0, #02A6F0, #FF79C7, #31FFD4, #1F2E7C};
-
+  boolean visivel;
+  float a;
+  
   //1 Marrom
   //2 Cinza
   //3 Amarelo
@@ -18,28 +20,32 @@ class cItem {
   cItem(PVector pos, int valor) {
     this.pos = pos;
     this.valor = valor;
+    this.visivel = true;
     if (valor >= 1 && valor<=cores.length) this.c = cores[valor-1];
   }
 
   void geraItem() {
     PVector aux = posicaoAleatoria();
-    //println("novo item");
-    while (grid[(int)aux.x][(int)aux.y]!=1 && jogador.pos.x==aux.x && jogador.pos.y==aux.y) {
+    while (grid[(int)aux.x][(int)aux.y]==2 || (jogador.pos.x==aux.x && jogador.pos.y==aux.y)) {
       aux = posicaoAleatoria();
     }
     pos = aux;
     valor = valorAleatorio();
+    visivel = true;
     if (valor >= 1 && valor<=cores.length) this.c = cores[valor-1];
   }
-  
+
   void showItem() {
-    fill(c);
-    rect(pos.x*l, pos.y*h, l, h);
+    if (visivel) {
+      fill(c);
+      strokeWeight(5);
+      stroke(lerpColor(c, 100, .5));
+      ellipse(pos.x*l+l/2, pos.y*h+h/2, l+sin(a), h+cos(a));
+      a+=.5;
+    }
   }
-  
-  void zeraItem(){
-    c = #72F08E;
-    valor = 0;
-    
+
+  void zeraItem() {
+    visivel = false;
   }
 }
