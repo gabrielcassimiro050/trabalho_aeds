@@ -17,16 +17,14 @@ class cItem {
   //9 Ciano
   //10 Indigo
 
-  cItem(PVector pos, int valor) {
-    this.pos = pos;
-    this.valor = valor;
-    this.visivel = true;
-    if (valor >= 1 && valor<=cores.length) this.c = cores[valor-1];
+  cItem() {
+    geraItem();
   }
 
   void geraItem() {
     PVector aux = posicaoAleatoria();
-    while (grid[(int)aux.x][(int)aux.y]==2 || (jogador.pos.x==aux.x && jogador.pos.y==aux.y)) {
+    while (grid[(int)aux.x][(int)aux.y].type==2 || (aux.x == jogador.pos.x && aux.y == jogador.pos.y)) {
+      println("ok");
       aux = posicaoAleatoria();
     }
     pos = aux;
@@ -38,7 +36,7 @@ class cItem {
   void showItem() {
     if (visivel) {
       fill(c);
-      strokeWeight(5);
+      //strokeWeight(5);
       stroke(lerpColor(c, 100, .5));
       ellipse(pos.x*l+l/2, pos.y*h+h/2, l+sin(a), h+cos(a));
       a+=.5;
