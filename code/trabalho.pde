@@ -1,11 +1,11 @@
 int[][] grid;
-int r = 100, c = 100; //Tamanho da grid
+int r = 20, c = 20; //Tamanho da grid
 int time = 0, frame = 5;
 float l, h; //Tamanho de cada espaço
 cPlayer jogador;
 cItem item;
-cContador contador;
-boolean contando, contaFinalizada;
+boolean gerando = false;
+long inicio, fim;
 //1 Grama
 //2 Árvore
 
@@ -31,23 +31,26 @@ PVector posicaoAleatoria() {
   return new PVector(floor(random(r)), floor(random(c)));
 }
 
-
-
-
-void contar(int tempo) {
-  contador = new cContador(tempo); //Criar um objeto da classe cContador
-  new Thread(contador).start(); //Engloba o objeto em uma thread
-}
-
 void showGrid() {
+  
   for (int x = 0; x < r; ++x) {
     for (int y = 0; y < c; ++y) {
-      noStroke();
-      //strokeWeight(1);
-      //stroke(#446C23);
+      strokeWeight(2);
+      stroke(#446C23);
       fill(#72F08E);
-      if (grid[x][y]==2) fill(#59B410);
       rect(x*l, y*h, l, h);
+    }
+  }
+  
+  //Evita que as bordas das árvores fiquem cortadas
+  for (int x = 0; x < r; ++x) {
+    for (int y = 0; y < c; ++y) {
+      if (grid[x][y]==2) {
+        strokeWeight(grid[x][y]==2? 5 : 2);
+        stroke(#446C23);
+        fill(#59B410);
+        rect(x*l, y*h, l, h);
+      }
     }
   }
 }
@@ -124,25 +127,37 @@ void setup() {
   grid = criarGrid();
   jogador = new cPlayer(new PVector(floor(r/2), floor(c/2)));
   item = new cItem(posicaoAleatoria(), valorAleatorio());
-  contador = new cContador(0);
+  inicio = millis();
+  fim = 0;
 }
 
 void draw() {
   background(255);
+
   showGrid();
-  if (time%frame==0) jogador.update();
+  
+  if (time%frame==0) jogador.update(); //Define a velocidade do jogador, aplicando um delay ao input de movimento
 
-  if (!contando) {
-    contar(10);
-  }
 
-  if (contaFinalizada) {
-    item.geraItem();
-    contaFinalizada = false;
+  //Checa se o número de iterações em segundos é múltiplo de 10
+  if ((floor((fim-inicio)/(float)1000))!=0 && (floor((fim-inicio)/(float)1000))%10 == 0) {
+    if (!gerando) {
+      println("ok");
+      item.geraItem();
+      gerando = true;
+    }
   }
 
   item.showItem();
   jogador.showPlayer();
+
+
+  //Checa se o tempo anterior e o atual possuem uma diferença de 1 segundo
+  //Para que não ocorra um bug em que o tempo permanece igual por um longo tempo...
+  //[...] e faz com que o item seja gerado várias vezes
+  long aux = millis();
+  if ((floor((aux-inicio)/(float)1000))-(floor((fim-inicio)/(float)1000))==1) gerando = false;
+  
+  fim = millis();
   ++time;
-  //if(mousePressed) setup();
 }
