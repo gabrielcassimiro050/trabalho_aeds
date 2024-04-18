@@ -1,5 +1,5 @@
-Interface de inventário;
+Interface de inventário; //Incompleta
 Interface do jogo;
-Sistema de inventário;
-Menu;
+Sistema de inventário; //Ta feito
+Menu; //Funcional, mas feio
 Sorting;
