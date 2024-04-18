@@ -1,45 +1,41 @@
 class cItem {
   PVector pos;
   int valor;
-  color c;
-  color[] cores = {#6F441C, #A5A4A3, #FFF750, #ED0A0A, #FC9103, #9002F0, #02A6F0, #FF79C7, #31FFD4, #1F2E7C};
+  PImage img;
   boolean visivel;
   float a;
   
-  //1 Marrom
-  //2 Cinza
-  //3 Amarelo
-  //4 Vermelho
-  //5 Laranja
-  //6 Roxo
-  //7 Azul
-  //8 Rosa
-  //9 Ciano
-  //10 Indigo
+  //1 Marrom -- Bronze
+  //2 Cinza -- Prata
+  //3 Amarelo -- Ouro
+  //4 Vermelho -- Rubi
+  //5 Laranja -- Topázio
+  //6 Roxo -- Ametista
+  //7 Azul -- Safira
+  //8 Rosa -- Bismuto
+  //9 Ciano -- Diamante
+  //10 Indigo -- Cosmos
 
   cItem() {
+    img = new PImage();
     geraItem();
   }
 
   void geraItem() {
     PVector aux = posicaoAleatoria();
     while (grid[(int)aux.x][(int)aux.y].type==2 || (aux.x == jogador.pos.x && aux.y == jogador.pos.y)) {
-      println("ok");
       aux = posicaoAleatoria();
     }
     pos = aux;
     valor = valorAleatorio();
     visivel = true;
-    if (valor >= 1 && valor<=cores.length) this.c = cores[valor-1];
+    if (valor >= 1 && valor<=itens.length) img = itens[valor-1];
   }
 
   void showItem() {
     if (visivel) {
-      fill(c);
-      //strokeWeight(5);
-      stroke(lerpColor(c, 100, .5));
-      ellipse(pos.x*l+l/2, pos.y*h+h/2, l+sin(a), h+cos(a));
-      a+=.5;
+      image(img, pos.x*l+l/2, pos.y*h+h/2+cos(a)*2, l, h);
+      a+=.3;
     }
   }
 
