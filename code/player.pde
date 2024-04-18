@@ -63,9 +63,9 @@ class cPlayer {
     if (flipped) scale(-1, 1);
     else scale(1, 1);
     //tint(255, 255, 255);
-
-    image(player, 0, 0, l+anim*map(cos(a), -1, 1, 0, 1), h+anim*map(cos(a), -1, 1, 0, 1));
-    anim = map(pitch.analyze(), 0, 500, 0, (l+h)/4);
+    rotate(sin(a)/100*pitch.analyze()/((r+c)/2));
+    image(player, 0, 0, l+anim*map(cos(a), -1, 1, 0, 1)/l, h+anim*map(cos(a), -1, 1, 0, 1)/h);
+    anim = pitch.analyze()/((r+c)/2);
     popMatrix();
     //rect(pos.x*l, pos.y*h, l, h);
     a+=.3;

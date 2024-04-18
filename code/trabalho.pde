@@ -1,7 +1,7 @@
 import processing.sound.*;
 
 cTile[][] grid;
-int r = 30, c = 15; //Tamanho da grid
+int r = 50, c = 50; //Tamanho da grid
 float l, h; //Tamanho de cada espaço
 
 int time = 0, frame = 5;
@@ -250,7 +250,7 @@ void mouseReleased() {
 }
 
 void setup() {
-  size(1000, 500);
+  size(750, 750);
   background(0);
   rectMode(CENTER);
   rect(width/2, height/2, width/4, width/4);

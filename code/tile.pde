@@ -12,7 +12,7 @@ class cTile {
 
   void show() {
     fill(c);
-    strokeWeight(5);
+    strokeWeight((l+h)/10);
     stroke(lerpColor(c, color(0, 255), .5));
     rect(pos.x*l, pos.y*h, l, h);
   }
