@@ -4,7 +4,7 @@ cTile[][] grid;
 int r = 50, c = 50; //Tamanho da grid
 float l, h; //Tamanho de cada espaço
 
-int time = 0, frame = 5;
+int time = 0, frame = floor(100/floor((r+c)/5));
 
 
 float scl = .1; //Escala do Noise
