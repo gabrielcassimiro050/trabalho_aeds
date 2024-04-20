@@ -1,3 +1,4 @@
-Mapa gerado proceduralmente;
-Câmera no personagem;
-Rios e lagos;
+Mapa gerado proceduralmente; //Feito
+Câmera no personagem; //Descartado
+Rios e lagos; //Talvez
+Otimização por chunks; //Ta pra ser feito
