@@ -21,6 +21,20 @@ class cMenu {
       checkboxes.add(new cCheckbox(x, y, tx, ty, visivel, txt));
   }
   
+  cBotao getBotao(String botao){
+    for(int i = 0; i < botoes.size(); ++i){
+      if(botao.equals(botoes.get(i).txt)) return botoes.get(i);
+    }
+    return null;
+  }
+  
+  cCheckbox getCheckbox(String checkbox){
+    for(int i = 0; i < checkboxes.size(); ++i){
+      if(checkbox.equals(checkboxes.get(i).txt)) return checkboxes.get(i);
+    }
+    return null;
+  }
+  
   void showMenu(){
     fill(255);
     rect(pos.x, pos.y, t.x, t.y);
