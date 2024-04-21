@@ -1,7 +1,7 @@
 import processing.sound.*;
 
 cTile[][] grid;
-int r = 25, c = 25; //Tamanho da grid
+int r = 10, c = 10; //Tamanho da grid
 float l, h; //Tamanho de cada espaço
 
 int time = 0, frame = floor(100/floor((r+c)/4));
@@ -18,6 +18,7 @@ SoundFile[] coleta;
 PitchDetector pitch;
 PImage[] itens;
 PImage[] tile;
+PImage player;
 PImage loading;
 
 color layout = color(0, 255, 0, 255);
@@ -76,7 +77,6 @@ cTile[][] criarGrid() {
 
 void eliminaVazios(int x, int y, int t) {
   if (t<(r*l+c*h)*2) {
-    //println(x+" "+y);
     ++t;
     for (int i = -1; i <= 1; ++i) {
       if (grid[xC(x+i)][y].type != 2 && grid[xC(x+i)][y].type != 4) {
@@ -106,7 +106,6 @@ void checaGrid() {
 }
 
 void showGrid() {
-  //println(layout);
   tiles[0] = lerpColor(layout, color(255, 255), .5);
   for (int x = 0; x < r; ++x) {
     for (int y = 0; y < c; ++y) {
@@ -289,14 +288,14 @@ void mouseReleased() {
       if (!mapaExpandido) {
         mapaExpandido = true;
         grid = criarGrid();
-        eliminaVazios(floor(r/2), floor(c/2), 0); //Seleciona os espaços impossíveis de chegar para remover
+        eliminaVazios(floor(r/2), floor(c/2), 0);
         checaGrid();
       }
     } else {
       if (mapaExpandido) {
         mapaExpandido = false;
         grid = criarGrid();
-        eliminaVazios(floor(r/2), floor(c/2), 0); //Seleciona os espaços impossíveis de chegar para remover
+        eliminaVazios(floor(r/2), floor(c/2), 0);
         checaGrid();
       }
     }
@@ -364,7 +363,7 @@ void setup() {
   menuStart = new cMenu(mx, my, mtx, mty, false);
 
 
-  menuStart.addBotao((mtx/2-mtx/2.5)/2+mx+mtx/2, my+(mty/2-mty/2.5)/2, mtx/2.5, mty/2.5, true, "Personagem");
+  menuStart.addBotao((mtx/2-mtx/2.5)/2+mx+mtx/2, my+(mty/2-mty/2.5)/2, mtx/2.5, mty/2.5, false, "");
   mundoX = (mtx/2-mtx/2.5)/2+mx;
   mundoY = my+(mty/2-mty/2.5)/2;
   mundoSX = mtx/2.5;
@@ -380,12 +379,12 @@ void setup() {
   menuStart.addBotao(mundoX+mtx/15, mundoY+mty/2.4+(5*mty/20)+mty/6, mtx/2.5-mtx/15, mty/20, true, "Inverno");
 
   grid = criarGrid();
-  eliminaVazios(floor(r/2), floor(c/2), 0); //Seleciona os espaços impossíveis de chegar para remover
+  eliminaVazios(floor(r/2), floor(c/2), 0);
   checaGrid();
 
   menuStart.addBotao(mundoX+mtx/2, my+mty-mty/8-mty/10-10, mtx/2.5, mty/10, true, "Start");
   menuStart.addBotao(mundoX+mtx/2, my+mty-mty/8, mtx/2.5, mty/10, true, "Voltar");
-  
+
 
 
 
@@ -398,6 +397,10 @@ void setup() {
   //Carrega tela de loading
   loading = new PImage();
   loading = loadImage("loading.png");
+
+  //Carrega jogador
+  player = new PImage();
+  player = loadImage("ladrao.png");
 
   //Toca a musica
   musica.play();
@@ -418,11 +421,11 @@ void draw() {
       int y = floor(c/2);
       jogador = new cPlayer(new PVector(x, y));
       /*grid = criarGrid();
-
-      
-      eliminaVazios(x, y, 0, grid); //Seleciona os espaços impossíveis de chegar para remover
-      checaGrid(grid); //Checa os espaços e remove eles
-      */
+       
+       
+       eliminaVazios(x, y, 0, grid); //Seleciona os espaços impossíveis de chegar para remover
+       checaGrid(grid); //Checa os espaços e remove eles
+       */
       //Carrega os sprites dos itens
       itens = new PImage[10];
       for (int i = 0; i < itens.length; ++i) itens[i] = loadImage("item_"+i+".png");
@@ -477,14 +480,24 @@ void draw() {
       for (int x = 0; x < r; ++x) {
         for (int y = 0; y < c; ++y) {
           noStroke();
-          //mundo[x][y].show();
           fill(tiles[grid[x][y].type-1]);
           rect(mundoX+x*lm, mundoY+y*hm, lm, hm);
-          //aux[x][y] = new cTile(x, y, random(1)<.9 ? 1 : 2); //Gera Árvores aleatórias
-          //if (aux[x][y].type==1 && random(1)>.5 && mapaExpandido) aux[x][y] = new cTile(x, y, (int)map(round(noise(x*scl, y*scl, seed)), 0, 1, 1, 2)); //Gera uma camada de noise
-          //if (dist(x*l, y*h, round(r/2)*l, round(c/2)*h)<log(width+height)*10) aux[x][y] = new cTile(x, y, 1); //Limpa área ao redor do personagem
         }
-      }
+      }    
+      
+      noStroke();
+      fill(#4BC7FF);
+      rect(mundoX+mundoSX+mundoSX/4.0, mundoY, mundoSX, mundoSY);
+      fill(tiles[0]);
+      rect(mundoX+mundoSX+mundoSX/4.0, mundoY+mundoSY-mundoSY/5, mundoSX+1, mundoSY/5);
+      image(player, mundoX+mundoSX+mundoSX/2.4, mundoY+mundoY/3.0, mundoSX/1.5, mundoSY/1.5);
+      noFill();
+      stroke(tiles[1]);
+      strokeWeight(5);
+      rect(mundoX, mundoY, mundoSX, mundoSY);
+      rect(mundoX+mundoSX+mundoSX/4.0, mundoY, mundoSX, mundoSY);
+      strokeWeight(1);
     }
+    
   }
 }

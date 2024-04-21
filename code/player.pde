@@ -1,7 +1,5 @@
 class cPlayer {
   PVector pos;
-  PImage player;
-
   float a = 0;
   float anim;
 
@@ -13,8 +11,6 @@ class cPlayer {
 
   cPlayer(PVector pos) {
     this.pos = pos;
-    player = new PImage();
-    player = loadImage("ladrao.png");
     inventario = new cInventario();
   }
   
