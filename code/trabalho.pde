@@ -1,17 +1,19 @@
 import processing.sound.*;
 
 cTile[][] grid;
-int r = 10, c = 10; //Tamanho da grid
+int r = 100, c = 10; //Tamanho da grid
 float l, h; //Tamanho de cada espaço
+float xOff, yOff; //Offset da grid
 
-int time = 0, frame = floor(100/floor((r+c)/4));
-
+int timeFrame = 0, frame = floor(10/floor(log(r+c)));
+int time = 0;
+int timeGame = 0;
 
 float scl = .1; //Escala do Noise
 float seed; //Seed do Noise
 
-float mundoX, mundoY;
-float mundoSX, mundoSY;
+float mundoX, mundoY; //POsições da preview
+float mundoSX, mundoSY; //Tamanhos da preview
 
 SoundFile musica;
 SoundFile[] coleta;
@@ -20,30 +22,29 @@ PImage[] itens;
 PImage[] tile;
 PImage player;
 PImage loading;
-
-color layout = color(0, 255, 0, 255);
+PFont pixelFont;
 
 cPlayer jogador;
 cItem item;
 cMenu menuInicial;
 cMenu menuStart;
-cMenu menuOps;
 
 
 
-boolean gerando = false;
+boolean contando = false;
 boolean mapaExpandido = false;
 boolean game = false, gaming;
+boolean paused = false;
 
 long inicio, fim;
 
-color tiles[] = {0, #59B410, #FFF0B7, 0}; //Grama, Árvore, Terra, Aux
+color tiles[] = {#8CFC98, #59B410, #FFF0B7, 0}; //Grama, Árvore, Terra, Aux
 int colisao[] = {2}; //Árvore
 
 
 
 
-//Garante que as coordenadas estejam dentro da grid
+//Garantem que as coordenadas estejam dentro da grid
 int xC(int x) {
   return (x+r)%r;
 }
@@ -55,6 +56,7 @@ int yC(int y) {
 
 
 //Funções da Grid---------------------------------------------------------------------------------------
+//Implementação que permite adicionar outros obstáculos
 boolean checarColisao(int x, int y) {
   for (int i = 0; i < colisao.length; ++i) {
     if (grid[x][y].type==colisao[i]) return false;
@@ -68,7 +70,7 @@ cTile[][] criarGrid() {
     for (int y = 0; y < c; ++y) {
       aux[x][y] = new cTile(x, y, random(1)<.9 ? 1 : 2); //Gera Árvores aleatórias
       if (aux[x][y].type==1 && random(1)>.5 && mapaExpandido) aux[x][y] = new cTile(x, y, (int)map(round(noise(x*scl, y*scl, seed)), 0, 1, 1, 2)); //Gera uma camada de noise
-      if (dist(x*l, y*h, round(r/2)*l, round(c/2)*h)<log(width+height)*10) aux[x][y] = new cTile(x, y, 1); //Limpa área ao redor do personagem
+      if (dist(x*l, y*h, round(r/2.0)*l, round(c/2.0)*h)<log(width+height)*10) aux[x][y] = new cTile(x, y, 1); //Limpa área ao redor do personagem
     }
   }
   return aux;
@@ -99,14 +101,14 @@ void checaGrid() {
     for (int y = 0; y < c; ++y) {
       if (grid[x][y].type == 1) grid[x][y] = new cTile(x, y, 2); //Troca Grama por Árvore
       if (grid[x][y].type == 4) grid[x][y] = new cTile(x, y, 1); //Troca Aux por Grama
-      if (dist(x*l, y*h, floor(r/2)*l, floor(c/2)*h)<log(width+height)*10) grid[x][y] = new cTile(x, y, 3); //Adiciona Terra
+      if (dist(x*l, y*h, floor(r/2.0)*l, floor(c/2.0)*h)<log(width+height)*10) grid[x][y] = new cTile(x, y, 3); //Adiciona Terra
       if (grid[x][y].type == 1) grid[x][y] = new cTile(x, y, round(noise(x*scl, y*scl, seedAux))==0 ? 1 : 3);
     }
   }
 }
 
 void showGrid() {
-  tiles[0] = lerpColor(layout, color(255, 255), .5);
+  background(#0C1B3B);
   for (int x = 0; x < r; ++x) {
     for (int y = 0; y < c; ++y) {
       grid[x][y].show();
@@ -126,97 +128,109 @@ PVector posicaoAleatoria() {
   return new PVector(floor(random(r)), floor(random(c)));
 }
 
+//Transforma ms em s
 int segundos(long i, long f) {
   return floor((f-i)/(float)1000);
 }
 
 //Movimentação
 void keyPressed() {
-  switch(key) {
-  case 'd':
-    jogador.right = true;
-    break;
-  case 'a':
-    jogador.left = true;
-    break;
-  case 'w':
-    jogador.up = true;
-    break;
-  case 's':
-    jogador.down = true;
-    break;
-  case 'e':
-    if (jogador.abrirInventario) {
-      jogador.abrirInventario = false;
-      showGrid();
-    } else {
-      jogador.abrirInventario = true;
+  if (game) {
+    switch(key) {
+    case 'd':
+      jogador.right = true;
+      break;
+    case 'a':
+      jogador.left = true;
+      break;
+    case 'w':
+      jogador.up = true;
+      break;
+    case 's':
+      jogador.down = true;
+      break;
+    case 'e':
+      if (jogador.abrirInventario) {
+        jogador.abrirInventario = false;
+        showGrid();
+      } else {
+        jogador.abrirInventario = true;
+      }
+      break;
     }
-    break;
-  }
-  switch(keyCode) {
-  case RIGHT:
-    jogador.right = true;
-    break;
-  case LEFT:
-    jogador.left = true;
-    break;
-  case UP:
-    jogador.up = true;
-    break;
-  case DOWN:
-    jogador.down = true;
-    break;
+    switch(keyCode) {
+    case RIGHT:
+      jogador.right = true;
+      break;
+    case LEFT:
+      jogador.left = true;
+      break;
+    case UP:
+      jogador.up = true;
+      break;
+    case DOWN:
+      jogador.down = true;
+      break;
+    }
   }
 }
 
 void keyReleased() {
-  switch(key) {
-  case 'd':
-    jogador.right = false;
-    break;
-  case 'a':
-    jogador.left = false;
-    break;
-  case 'w':
-    jogador.up = false;
-    break;
-  case 's':
-    jogador.down = false;
-    break;
-  case '1':
-    layout = color(0, 255, 100, 255);
-    showGrid();
-    break;
-  case '2':
-    layout = color(0, 255, 200, 255);
-    showGrid();
-    break;
-  case '3':
-    layout = color(255, 100, 0, 255);
-    showGrid();
-    break;
-  case '4':
-    layout = color(255, 255, 255, 255);
-    showGrid();
-    break;
+  for (int i = 0; i < menuStart.textboxes.size(); ++i) {
+    cTextbox textbox = menuStart.textboxes.get(i);
+    if (textbox.click) {
+      if (keyCode==BACKSPACE) textbox.txt = new String();
+
+      if (textbox.txt!=null && Character.isDigit(key)) {
+        if (!textbox.txt.equals("0")) {
+          textbox.txt = textbox.txt.concat(Character.toString(key));
+        } else {
+          textbox.txt = Character.toString(key);
+        }
+      } else if (keyCode!=ENTER) {
+        textbox.txt = "0";
+      }
+      textbox.txt = Integer.valueOf(textbox.txt)<=500 ? textbox.txt : "500";
+
+      println(textbox.txt);
+      if (keyCode==ENTER) {
+        if (textbox.nome.equals("R")) r = Integer.valueOf(textbox.txt);
+        if (textbox.nome.equals("C")) c = Integer.valueOf(textbox.txt);
+        grid = criarGrid();
+        eliminaVazios(floor(r/2.0), floor(c/2.0), 0);
+        checaGrid();
+      }
+    }
   }
-  switch(keyCode) {
-  case RIGHT:
-    jogador.right = false;
-    break;
-  case LEFT:
-    jogador.left = false;
-    break;
-  case UP:
-    jogador.up = false;
-    break;
-  case DOWN:
-    jogador.down = false;
-    break;
-  case BACKSPACE:
-    setup();
-    break;
+  if (game) {
+    switch(key) {
+    case 'd':
+      jogador.right = false;
+      break;
+    case 'a':
+      jogador.left = false;
+      break;
+    case 'w':
+      jogador.up = false;
+      break;
+    case 's':
+      jogador.down = false;
+      break;
+    }
+    switch(keyCode) {
+    case RIGHT:
+      jogador.right = false;
+      break;
+    case LEFT:
+      jogador.left = false;
+      break;
+    case UP:
+      jogador.up = false;
+      break;
+    case DOWN:
+      jogador.down = false;
+      break;
+    }
   }
 }
 void mousePressed() {
@@ -235,6 +249,10 @@ void mousePressed() {
     for (int i = 0; i < menuStart.checkboxes.size(); ++i) {
       cCheckbox checkbox = menuStart.checkboxes.get(i);
       checkbox.clicked();
+    }
+    for (int i = 0; i < menuStart.textboxes.size(); ++i) {
+      cTextbox textbox = menuStart.textboxes.get(i);
+      textbox.clicked();
     }
   }
 }
@@ -261,18 +279,14 @@ void mouseReleased() {
   if (menuStart.visivel) {
     cBotao start = menuStart.getBotao("Start");
     cBotao voltar = menuStart.getBotao("Voltar");
+    cBotao randomSeed = menuStart.getBotao("Random Seed");
     cCheckbox expandido = menuStart.getCheckbox("Expandido");
-    cCheckbox estacoes = menuStart.getCheckbox("Estações");
-    cBotao primavera = menuStart.getBotao("Primavera");
-    cBotao verao = menuStart.getBotao("Verão");
-    cBotao outono = menuStart.getBotao("Outono");
-    cBotao inverno = menuStart.getBotao("Inverno");
 
     if (start.click) {
       menuStart.visivel = false;
       background(#0C1B3B);
       imageMode(CENTER);
-      image(loading, width/2, height/2, 320, 160);
+      image(loading, width/2.0, height/2.0, 320, 160);
       game = true;
       start.click = false;
     }
@@ -283,111 +297,76 @@ void mouseReleased() {
       voltar.click = false;
     }
 
-
     if (expandido.click) {
       if (!mapaExpandido) {
         mapaExpandido = true;
         grid = criarGrid();
-        eliminaVazios(floor(r/2), floor(c/2), 0);
+        eliminaVazios(floor(r/2.0), floor(c/2.0), 0);
         checaGrid();
       }
     } else {
       if (mapaExpandido) {
         mapaExpandido = false;
         grid = criarGrid();
-        eliminaVazios(floor(r/2), floor(c/2), 0);
+        eliminaVazios(floor(r/2.0), floor(c/2.0), 0);
         checaGrid();
       }
     }
 
-    if (primavera.click) {
-      estacoes.click = false;
-      layout = color(0, 255, 100, 255);
-      primavera.click = false;
-    }
-    if (verao.click) {
-      estacoes.click = false;
-      layout = color(0, 255, 200, 255);
-      verao.click = false;
-    }
-    if (outono.click) {
-      estacoes.click = false;
-      layout = color(255, 100, 0, 255);
-      outono.click = false;
-    }
-    if (inverno.click) {
-      estacoes.click = false;
-      layout = color(255, 255, 255, 255);
-      inverno.click = false;
-    }
-
-    if (estacoes.click) {
-      primavera.visivel = true;
-      verao.visivel = true;
-      outono.visivel = true;
-      inverno.visivel = true;
-    } else {
-      primavera.visivel = false;
-      verao.visivel = false;
-      outono.visivel = false;
-      inverno.visivel = false;
+    if (randomSeed.click) {
+      seed = random(100);
+      grid = criarGrid();
+      eliminaVazios(floor(r/2.0), floor(c/2.0), 0);
+      checaGrid();
+      randomSeed.click = false;
     }
   }
-
   //--------------------------------------------
 }
 
 void setup() {
-  size(700, 700);
-  background(0);
+  size(750, 750);
+  background(#0C1B3B);
 
   //Tela de Loading
   rectMode(CENTER);
-  rect(width/2, height/2, width/4, width/4);
+  rect(width/2.0, height/2.0, width/4.0, width/4.0);
   rectMode(CORNER);
-
-
-
+  
   l = width/(float)r;
   h = height/(float)c;
 
-  //Define o menu inicial
+  //Define o tamanho dos menus e suas posições
   float mtx = width/1.5, mty = height/1.5;
-  float mx = (width-mtx)/2, my = (height-mty)/2;
-  menuInicial = new cMenu(mx, my, mtx, mty, true);
-  menuInicial.addBotao(mx, my, mtx, mty/3, true, "Game");
-  menuInicial.addBotao(mx, my+mty/3, mtx, mty/3, true, "Opções");
-  menuInicial.addBotao(mx, my+2*mty/3, mtx, mty/3, true, "Sair");
-
-  //Define o menu de start
-  menuStart = new cMenu(mx, my, mtx, mty, false);
-
-
-  menuStart.addBotao((mtx/2-mtx/2.5)/2+mx+mtx/2, my+(mty/2-mty/2.5)/2, mtx/2.5, mty/2.5, false, "");
-  mundoX = (mtx/2-mtx/2.5)/2+mx;
-  mundoY = my+(mty/2-mty/2.5)/2;
+  float mx = (width-mtx)/2.0, my = (height-mty)/2.0;
+  
+  //Define as proporções da preview
+  mundoX = (mtx/2.0-mtx/2.5)/2+mx;
+  mundoY = my+(mty/2.0-mty/2.5)/2;
   mundoSX = mtx/2.5;
   mundoSY = mty/2.5;
-  menuStart.addBotao(mundoX, mundoY, mundoX+r*(mundoX/mundoSX), mundoY+c*(mundoY/mundoSY), false, "Mundo");
 
-  menuStart.addCheckbox(mundoX, mundoY+mty/5+mty/20+mty/6, mtx/2.5, mty/10, true, "Expandido");
+  //Define o menu Inicial
+  menuInicial = new cMenu(mx, my, mtx, mty, true);
+  menuInicial.addBotao(mx, my, mtx, mty/3.0, true, "Game");
+  menuInicial.addBotao(mx, my+2*mty/3.0, mtx, mty/3.0, true, "Sair");
+  
+  //Define o menu de Start e seus acessórios se baseando na posição da preview
+  menuStart = new cMenu(mx, my, mtx, mty, false);
+  menuStart.addBotao(mundoX, mundoY, mundoX+r*(mundoX/mundoSX), mundoY+c*(mundoY/mundoSY), false, "Mundo"); //Placeholder da preview
+  menuStart.addCheckbox(mundoX, mundoY+mty/5.0+mty/20.0+mty/6.0, mtx/2.5, mty/10.0, true, "Expandido");
+  menuStart.addBotao(mundoX, mundoY+mty/5.0+mty/20.0+mty/6+mty/10.0, mtx/2.5, mty/10.0, true, "Random Seed");
 
-  menuStart.addCheckbox(mundoX, my+(mty/2-mty/2.5)/2+mty/2.4+mty/6, mtx/2.5, mty/10, true, "Estações");
-  menuStart.addBotao(mundoX+mtx/15, mundoY+mty/2.4+(2*mty/20)+mty/6, mtx/2.5-mtx/15, mty/20, true, "Primavera");
-  menuStart.addBotao(mundoX+mtx/15, mundoY+mty/2.4+(3*mty/20)+mty/6, mtx/2.5-mtx/15, mty/20, true, "Verão");
-  menuStart.addBotao(mundoX+mtx/15, mundoY+mty/2.4+(4*mty/20)+mty/6, mtx/2.5-mtx/15, mty/20, true, "Outono");
-  menuStart.addBotao(mundoX+mtx/15, mundoY+mty/2.4+(5*mty/20)+mty/6, mtx/2.5-mtx/15, mty/20, true, "Inverno");
+  menuStart.addTextbox(mundoX, mundoY+mty/5.0+mty/20+mty/6+mty/5.0, mtx/2.5, mty/10.0, true, "R", "10");
+  menuStart.addTextbox(mundoX, mundoY+mty/5.0+mty/20.0+mty/6.0+mty/5.0+mty/10.0, mtx/2.5, mty/10.0, true, "C", "10");
 
+  menuStart.addBotao(mundoX+mtx/2.0, my+mty-mty/8.0-mty/10.0-10, mtx/2.5, mty/10.0, true, "Start");
+  menuStart.addBotao(mundoX+mtx/2.0, my+mty-mty/8.0, mtx/2.5, mty/10.0, true, "Voltar");
+
+  //Cria o que servirá para a preview inicial
   grid = criarGrid();
-  eliminaVazios(floor(r/2), floor(c/2), 0);
+  eliminaVazios(floor(r/2.0), floor(c/2.0), 0);
   checaGrid();
-
-  menuStart.addBotao(mundoX+mtx/2, my+mty-mty/8-mty/10-10, mtx/2.5, mty/10, true, "Start");
-  menuStart.addBotao(mundoX+mtx/2, my+mty-mty/8, mtx/2.5, mty/10, true, "Voltar");
-
-
-
-
 
   //Carrega os sons
   musica = new SoundFile(this, "music.mp3");
@@ -402,6 +381,10 @@ void setup() {
   player = new PImage();
   player = loadImage("ladrao.png");
 
+  //Carrega fonte
+  pixelFont = createFont("Minecraft.ttf", 20);
+  textFont(pixelFont);
+
   //Toca a musica
   musica.play();
   musica.loop();
@@ -415,21 +398,19 @@ void setup() {
 void draw() {
   if (game) {
 
+    //Carregamento
     if (!gaming) {
       //seed = random(100);
-      int x = floor(r/2);
-      int y = floor(c/2);
+      background(#0C1B3B);
+      int x = floor(r/2.0);
+      int y = floor(c/2.0);
       jogador = new cPlayer(new PVector(x, y));
-      /*grid = criarGrid();
-       
-       
-       eliminaVazios(x, y, 0, grid); //Seleciona os espaços impossíveis de chegar para remover
-       checaGrid(grid); //Checa os espaços e remove eles
-       */
+
       //Carrega os sprites dos itens
       itens = new PImage[10];
       for (int i = 0; i < itens.length; ++i) itens[i] = loadImage("item_"+i+".png");
       item = new cItem();
+
       //Carrega os sprites dos tiles
       tile = new PImage[8];
       for (int i = 0; i < tile.length; ++i) tile[i] = loadImage("tile_"+i+".png");
@@ -438,66 +419,106 @@ void draw() {
       pitch = new PitchDetector(this, 0);
       pitch.input(musica);
 
-      //Carrega o grid inteiro apenas na primeira iteração
-      showGrid();
+      //Calcula o offset do mapa
+      if (c>r) {
+        l*=(r/(float)c);
+        xOff = (width-r*l)/2.0;
+      }
+      if (r>c) {
+        h*=(c/(float)r);
+        yOff = (height-c*h)/2.0;
+      }
     }
 
     gaming = true;
 
     //Define a velocidade do jogador, aplicando um delay ao input de movimento
-    if (time%frame==0) jogador.update();
+    if (timeFrame%frame==0 && !paused) jogador.update();
 
-    //Checa se o número de iterações em segundos é múltiplo de 10
-    if (segundos(inicio, fim)!=0 && segundos(inicio, fim)%10 == 0) {
-      if (!gerando) {
-        item.zeraItem();
-        item.geraItem();
-        gerando = true;
-      }
+    //Gera o item enquanto não estiver pausado e 10 segundos passaram
+    if (time%10 == 0 && !contando && !paused) {
+      item.zeraItem();
+      item.geraItem();
     }
 
-    //Mostra o item e o jogador
-    if (!jogador.abrirInventario) item.showItem();
-    jogador.showPlayer();
+    //Conta o tempo de jogo enquanto não estiver pausado e 1 segundo passar
+    if (time%1 == 0 && !contando && !paused) {
+      timeGame++;
+    }
 
+    //Checa se o jogo ainda não acabou
+    if (120-timeGame<=0 && contando) game = false;
 
+    //Mostra o jogador
+    jogador.show();
 
-    //Checa se o tempo anterior e o atual possuem uma diferença de 1 segundo
-    //Para que não ocorra um bug em que o tempo permanece igual por um longo tempo...
-    //[...] e faz com que o item seja gerado várias vezes
+    //Checa se o inventário está aberto e pausa o jogo
+
+    if (!jogador.abrirInventario) {
+      showGrid();
+      item.show();
+      jogador.show();
+      paused = false;
+      contando = false;
+      fill(255);
+      text((120-timeGame)/60+":"+(120-timeGame)%60, width/15.0, height/15.0);
+      text(jogador.score, width-width/15.0, height/15.0);
+    } else {
+      contando = true;
+      paused = true;
+      fill(255);
+      text((120-timeGame)/60+":"+(120-timeGame)%60, width/15.0, height-height/15.0);
+      text(jogador.score, width-width/15.0, height-height/15.0);
+    }
+
+    //Conta os segundos
     long aux = millis();
-    if (segundos(inicio, aux)-segundos(inicio, fim)==1) gerando = false;
-
+    if (segundos(inicio, aux)-segundos(inicio, fim)==1) {
+      ++time;
+      contando = false;
+    } else {
+      contando = true;
+    }
     fim = millis();
-    ++time;
+
+    ++timeFrame;
   } else {
-    if (menuInicial.visivel) menuInicial.showMenu();
+    if (menuInicial.visivel) menuInicial.show();
     if (menuStart.visivel) {
-      menuStart.showMenu();
+      menuStart.show();
+
+      //Cria a preview do mapa
       float lm = mundoSX/(float)r, hm = mundoSY/(float)c;
-      tiles[0] = lerpColor(layout, color(255, 255), .5);
-      tiles[1] = lerpColor(layout, color(100, 255), .5);
+      float xOffm = 0, yOffm = 0;
+      if (c>r) {
+        lm*=(r/(float)c);
+        xOffm = (mundoSX-r*lm)/2.0;
+      }
+      if (r>c) {
+        hm*=(c/(float)r);
+        yOffm = (mundoSY-c*hm)/2.0;
+      }
+
       for (int x = 0; x < r; ++x) {
         for (int y = 0; y < c; ++y) {
           noStroke();
           fill(tiles[grid[x][y].type-1]);
-          rect(mundoX+x*lm, mundoY+y*hm, lm, hm);
+          rect(mundoX+x*lm+xOffm, mundoY+y*hm+yOffm, lm, hm);
         }
-      }    
-      
+      }
+
       noStroke();
       fill(#4BC7FF);
       rect(mundoX+mundoSX+mundoSX/4.0, mundoY, mundoSX, mundoSY);
       fill(tiles[0]);
-      rect(mundoX+mundoSX+mundoSX/4.0, mundoY+mundoSY-mundoSY/5, mundoSX+1, mundoSY/5);
+      rect(mundoX+mundoSX+mundoSX/4.0, mundoY+mundoSY-mundoSY/5.0, mundoSX+1, mundoSY/5.0);
       image(player, mundoX+mundoSX+mundoSX/2.4, mundoY+mundoY/3.0, mundoSX/1.5, mundoSY/1.5);
       noFill();
-      stroke(tiles[1]);
-      strokeWeight(5);
+      stroke(lerpColor(tiles[1], color(100, 255), .5));
+      strokeWeight(3);
       rect(mundoX, mundoY, mundoSX, mundoSY);
       rect(mundoX+mundoSX+mundoSX/4.0, mundoY, mundoSX, mundoSY);
       strokeWeight(1);
     }
-    
   }
 }

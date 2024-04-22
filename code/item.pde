@@ -41,11 +41,11 @@ class cItem {
     if (valor >= 1 && valor<=itens.length) img = itens[valor-1];
   }
 
-  void showItem() {
+  void show() {
     if (visivel) {
       updateTiles();
       imageMode(CORNER);
-      image(img, pos.x*l, pos.y*h+cos(a)*2, l, h);
+      image(img, pos.x*l+xOff, pos.y*h+cos(a)*2+yOff, l, h);
       a+=.3;
     }
   }

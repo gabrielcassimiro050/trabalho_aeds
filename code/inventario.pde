@@ -16,7 +16,7 @@ class cInventario {
     else return 0;
   }
 
-  void showInventario() {
+  void show() {
     fill(100, 10);
     noStroke();
     rect(0, 0, width, height);

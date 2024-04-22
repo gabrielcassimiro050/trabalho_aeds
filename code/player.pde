@@ -2,7 +2,7 @@ class cPlayer {
   PVector pos;
   float a = 0;
   float anim;
-
+  int score = 0;
   cInventario inventario;
 
   boolean flipped;
@@ -13,19 +13,19 @@ class cPlayer {
     this.pos = pos;
     inventario = new cInventario();
   }
-  
-  
-  void updateTiles(){
+
+
+  void updateTiles() {
     int x = (int)pos.x, y = (int)pos.y;
     int ix = (int)item.pos.x, iy = (int)item.pos.y;
     //Atualiza todos os tiles em volta de uma vez, sem contar o item
     for (int i = -1; i <= 1; ++i) {
       for (int j = -1; j <= 1; ++j) {
-        if(!(item.visivel && ix==xC(x+i) && iy==yC(y+j))) grid[xC(x+i)][yC(y+j)].show();
+        if (!(item.visivel && ix==xC(x+i) && iy==yC(y+j))) grid[xC(x+i)][yC(y+j)].show();
       }
     }
   }
-  
+
   void update() {
     int x = (int)pos.x, y = (int)pos.y;
     int dx = 0, dy = 0;
@@ -51,19 +51,20 @@ class cPlayer {
       updateTiles();
       pos = new PVector(xC(x+dx), yC(y+dy));
       if (item.visivel && x == item.pos.x && y == item.pos.y) {
+        item.zeraItem();
         if (item.valor>=8) coleta[1].play();
         else coleta[0].play();
+        score+=item.valor;
         inventario.addItem(item);
-        item.zeraItem();
       }
     }
   }
 
-  void showPlayer() {
+  void show() {
     updateTiles();
     imageMode(CENTER);
     pushMatrix();
-    translate(pos.x*l+l/2, pos.y*h+h/2);
+    translate(pos.x*l+l/2+xOff, pos.y*h+h/2+yOff);
     if (flipped) scale(-1, 1);
     else scale(1, 1);
     rotate(sin(a)/100*pitch.analyze()/((r+c)/2));
@@ -71,6 +72,6 @@ class cPlayer {
     anim = pitch.analyze()/((r+c)/2);
     popMatrix();
     a+=.3;
-    if (abrirInventario) inventario.showInventario();
+    if (abrirInventario) inventario.show();
   }
 }

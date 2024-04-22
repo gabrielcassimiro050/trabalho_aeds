@@ -1,25 +1,25 @@
 class cBotao {
   PVector pos;
   PVector t; //Tamanho
-  String txt;
+  String nome;
   boolean visivel;
   boolean click;
 
-  cBotao(float x, float y, float tx, float ty, boolean visivel, String txt) {
+  cBotao(float x, float y, float tx, float ty, boolean visivel, String nome) {
     pos = new PVector(x, y);
     t = new PVector(tx, ty);
     this.visivel = visivel;
-    this.txt = txt;
+    this.nome = nome;
   }
 
-  void showBotao() {
+  void show() {
     if (visivel) {
       if (click) fill(100);
       else fill(255);
       stroke(1);
       rect(pos.x, pos.y, t.x, t.y);
       fill(0);
-      text(txt, pos.x+t.x/2.3, pos.y+30);
+      text(nome, pos.x+t.x/2.3, pos.y+30);
     }
   }
 
