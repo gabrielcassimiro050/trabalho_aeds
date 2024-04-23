@@ -1,11 +1,12 @@
 import processing.sound.*;
 
 cTile[][] grid;
-int r = 100, c = 10; //Tamanho da grid
+int r = 10, c = 10; //Tamanho da grid
 float l, h; //Tamanho de cada espaço
 float xOff, yOff; //Offset da grid
 
 int timeFrame = 0, frame = floor(10/floor(log(r+c)));
+
 int time = 0;
 int timeGame = 0;
 
@@ -15,9 +16,11 @@ float seed; //Seed do Noise
 float mundoX, mundoY; //POsições da preview
 float mundoSX, mundoSY; //Tamanhos da preview
 
+//Para o som funcionar, vá em Ferramentas (Tools) -> Manage Tools... -> Libraries -> Pesquisar sound e instalar Sound do Processing Foundation
 SoundFile musica;
 SoundFile[] coleta;
 PitchDetector pitch;
+
 PImage[] itens;
 PImage[] tile;
 PImage player;
@@ -78,7 +81,7 @@ cTile[][] criarGrid() {
 
 
 void eliminaVazios(int x, int y, int t) {
-  if (t<(r*l+c*h)*2) {
+  if (t<pow((r+c),1.2)) {
     ++t;
     for (int i = -1; i <= 1; ++i) {
       if (grid[xC(x+i)][y].type != 2 && grid[xC(x+i)][y].type != 4) {
@@ -196,6 +199,8 @@ void keyReleased() {
       if (keyCode==ENTER) {
         if (textbox.nome.equals("R")) r = Integer.valueOf(textbox.txt);
         if (textbox.nome.equals("C")) c = Integer.valueOf(textbox.txt);
+        l = width/(float)r;
+        h = height/(float)c;
         grid = criarGrid();
         eliminaVazios(floor(r/2.0), floor(c/2.0), 0);
         checaGrid();
@@ -314,7 +319,7 @@ void mouseReleased() {
     }
 
     if (randomSeed.click) {
-      seed = random(100);
+      seed = random(1000000);
       grid = criarGrid();
       eliminaVazios(floor(r/2.0), floor(c/2.0), 0);
       checaGrid();
@@ -332,14 +337,14 @@ void setup() {
   rectMode(CENTER);
   rect(width/2.0, height/2.0, width/4.0, width/4.0);
   rectMode(CORNER);
-  
+
   l = width/(float)r;
   h = height/(float)c;
 
   //Define o tamanho dos menus e suas posições
   float mtx = width/1.5, mty = height/1.5;
   float mx = (width-mtx)/2.0, my = (height-mty)/2.0;
-  
+
   //Define as proporções da preview
   mundoX = (mtx/2.0-mtx/2.5)/2+mx;
   mundoY = my+(mty/2.0-mty/2.5)/2;
@@ -350,7 +355,7 @@ void setup() {
   menuInicial = new cMenu(mx, my, mtx, mty, true);
   menuInicial.addBotao(mx, my, mtx, mty/3.0, true, "Game");
   menuInicial.addBotao(mx, my+2*mty/3.0, mtx, mty/3.0, true, "Sair");
-  
+
   //Define o menu de Start e seus acessórios se baseando na posição da preview
   menuStart = new cMenu(mx, my, mtx, mty, false);
   menuStart.addBotao(mundoX, mundoY, mundoX+r*(mundoX/mundoSX), mundoY+c*(mundoY/mundoSY), false, "Mundo"); //Placeholder da preview
@@ -428,6 +433,7 @@ void draw() {
         h*=(c/(float)r);
         yOff = (height-c*h)/2.0;
       }
+      showGrid();
     }
 
     gaming = true;
@@ -453,9 +459,8 @@ void draw() {
     jogador.show();
 
     //Checa se o inventário está aberto e pausa o jogo
-
     if (!jogador.abrirInventario) {
-      showGrid();
+      //showGrid();
       item.show();
       jogador.show();
       paused = false;
@@ -471,6 +476,8 @@ void draw() {
       text(jogador.score, width-width/15.0, height-height/15.0);
     }
 
+
+    //inicio = 0 fim = 0
     //Conta os segundos
     long aux = millis();
     if (segundos(inicio, aux)-segundos(inicio, fim)==1) {
