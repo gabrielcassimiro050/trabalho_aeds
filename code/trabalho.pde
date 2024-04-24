@@ -7,8 +7,9 @@ float xOff, yOff; //Offset da grid
 
 int timeFrame = 0, frame = floor(10/floor(log(r+c)));
 
-int time = 0;
-int timeGame = 0;
+int time = 0; //Tempo desde do início do jogo
+int timeGame = 0; //Tempo em jogo
+int timeMax = 120; //Tempo máximo de jogo
 
 float scl = .1; //Escala do Noise
 float seed; //Seed do Noise
@@ -16,15 +17,14 @@ float seed; //Seed do Noise
 float mundoX, mundoY; //POsições da preview
 float mundoSX, mundoSY; //Tamanhos da preview
 
-//Para o som funcionar, vá em Ferramentas (Tools) -> Manage Tools... -> Libraries -> Pesquisar sound e instalar Sound do Processing Foundation
 SoundFile musica;
 SoundFile[] coleta;
 PitchDetector pitch;
-
 PImage[] itens;
 PImage[] tile;
 PImage player;
 PImage loading;
+PImage timeBoard, scoreBoard;
 PFont pixelFont;
 
 cPlayer jogador;
@@ -81,7 +81,7 @@ cTile[][] criarGrid() {
 
 
 void eliminaVazios(int x, int y, int t) {
-  if (t<pow((r+c),1.2)) {
+  if (t<(r*2+c*2)*2){
     ++t;
     for (int i = -1; i <= 1; ++i) {
       if (grid[xC(x+i)][y].type != 2 && grid[xC(x+i)][y].type != 4) {
@@ -193,10 +193,10 @@ void keyReleased() {
       } else if (keyCode!=ENTER) {
         textbox.txt = "0";
       }
-      textbox.txt = Integer.valueOf(textbox.txt)<=500 ? textbox.txt : "500";
 
-      println(textbox.txt);
       if (keyCode==ENTER) {
+        if (textbox.txt=="0") textbox.txt = "1";
+        textbox.txt = Integer.valueOf(textbox.txt)<=250 ? textbox.txt : "250";
         if (textbox.nome.equals("R")) r = Integer.valueOf(textbox.txt);
         if (textbox.nome.equals("C")) c = Integer.valueOf(textbox.txt);
         l = width/(float)r;
@@ -258,6 +258,7 @@ void mousePressed() {
     for (int i = 0; i < menuStart.textboxes.size(); ++i) {
       cTextbox textbox = menuStart.textboxes.get(i);
       textbox.clicked();
+      if (textbox.click) textbox.txt = "0";
     }
   }
 }
@@ -319,7 +320,7 @@ void mouseReleased() {
     }
 
     if (randomSeed.click) {
-      seed = random(1000000);
+      seed = random(100);
       grid = criarGrid();
       eliminaVazios(floor(r/2.0), floor(c/2.0), 0);
       checaGrid();
@@ -417,8 +418,15 @@ void draw() {
       item = new cItem();
 
       //Carrega os sprites dos tiles
-      tile = new PImage[8];
+      tile = new PImage[11];
       for (int i = 0; i < tile.length; ++i) tile[i] = loadImage("tile_"+i+".png");
+
+
+      //Carrega os sprites do time e score
+      timeBoard = new PImage();
+      scoreBoard = new PImage();
+      timeBoard = loadImage("time.png");
+      scoreBoard = loadImage("score.png");
 
       //Define e coloca input no PitchDetector (Detecta a nota fundamental)
       pitch = new PitchDetector(this, 0);
@@ -453,31 +461,32 @@ void draw() {
     }
 
     //Checa se o jogo ainda não acabou
-    if (120-timeGame<=0 && contando) game = false;
+    if (timeMax-timeGame<=0 && contando) game = false;
 
-    //Mostra o jogador
+    //Mostra o jogador e o item
+    if (!jogador.abrirInventario) item.show();
     jogador.show();
 
     //Checa se o inventário está aberto e pausa o jogo
     if (!jogador.abrirInventario) {
-      //showGrid();
-      item.show();
-      jogador.show();
+
       paused = false;
       contando = false;
-      fill(255);
-      text((120-timeGame)/60+":"+(120-timeGame)%60, width/15.0, height/15.0);
-      text(jogador.score, width-width/15.0, height/15.0);
+      image(timeBoard, width*.08, height*.04, width*.16, height*.08);
+      image(scoreBoard, width-width*.08, height*.04, width*.16, height*.08);
+      fill(#82441a);
+      text((timeMax-timeGame)/60+":"+nf((timeMax-timeGame)%60, 2), width/25.0, height/20.0);
+      text(nf(jogador.score, 4), width-width/10.0, height/20.0);
     } else {
       contando = true;
       paused = true;
       fill(255);
-      text((120-timeGame)/60+":"+(120-timeGame)%60, width/15.0, height-height/15.0);
-      text(jogador.score, width-width/15.0, height-height/15.0);
+      text((timeMax-timeGame)/60+":"+nf((timeMax-timeGame)%60, 2), width/25.0, height-height/20.0);
+      text(nf(jogador.score, 4), width-width/10.0, height-height/20.0);
     }
 
 
-    //inicio = 0 fim = 0
+
     //Conta os segundos
     long aux = millis();
     if (segundos(inicio, aux)-segundos(inicio, fim)==1) {

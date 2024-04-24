@@ -1,8 +1,10 @@
 class cInventario {
   Lista<Integer> inventario;
+  int nItems;
 
   cInventario() {
     inventario = new Lista<Integer>();
+    nItems = 0;
   }
 
   void addItem(cItem item) {
