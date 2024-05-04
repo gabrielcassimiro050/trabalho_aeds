@@ -1,77 +1,88 @@
-class cTile {
+class tile{
   PVector pos;
-  int type;
+  int tipo;
 
 
 
-  cTile(int x, int y, int type) {
+  tile(int x, int y, int tipo) {
     this.pos = new PVector(x, y);
-    this.type = type;
+    this.tipo = tipo;
   }
 
   void show() {
     int x = (int)pos.x, y = (int)pos.y;
-    if (type==2) {
-      tint(0, 255, 150, 255);
+    if (tipo==2) {
+
+
+      //Coloca Grama ou Terra abaixo da Árvore
       noStroke();
-      if (grid[x][yC(y-1)].type!=2) {
-        fill(tiles[grid[x][yC(y-1)].type-1]);
+      if (grid[x][yC(y-1)].tipo!=2) {
+        fill(tiles[grid[x][yC(y-1)].tipo-1]);
       } else {
-        fill(tiles[grid[x][yC(y+1)].type-1]);
+        fill(tiles[grid[x][yC(y+1)].tipo-1]);
       }
-      rect(x*l+xOff, y*h+yOff, l, h);
 
-      //Organiza os sprite para que estejam conectados
       imageMode(CORNER);
+      tint(200, 255, 100, 255);
+      image(tileSprites[0], x*l+xOffset, y*h+yOffset, l, h);
 
-      if ((grid[xC(x+1)][y].type==2 || grid[xC(x-1)][y].type==2)) {
-        if (grid[x][yC(y-1)].type==2) {
-          if (grid[xC(x+1)][y].type==2) {
-            image(tile[5], x*l+xOff, y*h+yOff, l, h);
+      //Organiza os sprites da Árvore para que estejam conectados
+
+      tint(0, 255, 150, 255);
+      if ((grid[xC(x+1)][y].tipo==2 || grid[xC(x-1)][y].tipo==2)) {
+        if (grid[x][yC(y-1)].tipo==2) {
+          if (grid[xC(x+1)][y].tipo==2) {
+            image(tileSprites[5], x*l+xOffset, y*h+yOffset, l, h);
           } else {
-            image(tile[8], x*l+xOff, y*h+yOff, l, h);
+            image(tileSprites[8], x*l+xOffset, y*h+yOffset, l, h);
           }
         } else {
-          if (grid[xC(x+1)][y].type==2) {
-            image(tile[4], x*l+xOff, y*h+yOff, l, h);
+          if (grid[xC(x+1)][y].tipo==2) {
+            image(tileSprites[4], x*l+xOffset, y*h+yOffset, l, h);
           } else {
-            image(tile[9], x*l+xOff, y*h+yOff, l, h);
+            image(tileSprites[9], x*l+xOffset, y*h+yOffset, l, h);
           }
         }
-      }else{
-        if (grid[x][yC(y-1)].type==2 && grid[x][yC(y+1)].type!=2) {
-          image(tile[7], x*l+xOff, y*h+yOff, l, h);
-        }else{
-          image(tile[3], x*l+xOff, y*h+yOff, l, h);
+      } else {
+        if (grid[x][yC(y-1)].tipo==2 && grid[x][yC(y+1)].tipo!=2) {
+          image(tileSprites[7], x*l+xOffset, y*h+yOffset, l, h);
+        } else {
+          image(tileSprites[3], x*l+xOffset, y*h+yOffset, l, h);
         }
       }
 
 
-      if (grid[xC(x+1)][y].type==2 && grid[xC(x-1)][y].type==2) {
-        image(tile[2], x*l+xOff, y*h+yOff, l, h);
+      if (grid[xC(x+1)][y].tipo==2 && grid[xC(x-1)][y].tipo==2) {
+        image(tileSprites[2], x*l+xOffset, y*h+yOffset, l, h);
       }
 
-      if (grid[x][yC(y+1)].type==2) {
-        if (grid[x][yC(y-1)].type==2 || grid[xC(x-1)][y].type==2 && grid[xC(x+1)][y].type==2) {
-          image(tile[0], x*l+xOff, y*h+yOff, l, h);
+      if (grid[x][yC(y+1)].tipo==2) {
+        if (grid[x][yC(y-1)].tipo==2 || grid[xC(x-1)][y].tipo==2 && grid[xC(x+1)][y].tipo==2) {
+          image(tileSprites[0], x*l+xOffset, y*h+yOffset, l, h);
         }
-        if (grid[xC(x+1)][y].type!=2 && grid[xC(x-1)][y].type!=2) {
-          image(tile[1], x*l+xOff, y*h+yOff, l, h);
+        if (grid[xC(x+1)][y].tipo!=2 && grid[xC(x-1)][y].tipo!=2) {
+          image(tileSprites[1], x*l+xOffset, y*h+yOffset, l, h);
         }
-        if (grid[xC(x+1)][y].type!=2 && grid[xC(x-1)][y].type==2) {
-          image(tile[6], x*l+xOff, y*h+yOff, l, h);
-        } else if (grid[xC(x+1)][y].type==2 && grid[xC(x-1)][y].type!=2) {
-          image(tile[10], x*l+xOff, y*h+yOff, l, h);
+        if (grid[xC(x+1)][y].tipo!=2 && grid[xC(x-1)][y].tipo==2) {
+          image(tileSprites[6], x*l+xOffset, y*h+yOffset, l, h);
+        } else if (grid[xC(x+1)][y].tipo==2 && grid[xC(x-1)][y].tipo!=2) {
+          image(tileSprites[10], x*l+xOffset, y*h+yOffset, l, h);
         }
       }
 
       tint(255, 255, 255, 255);
     } else {
-      fill(tiles[type-1]);
-      noStroke();
-      //strokeWeight((l+h)/10);
-      //stroke(lerpColor(c, color(0, 255), .5));
-      rect(x*l+xOff, y*h+yOff, l, h);
+
+      if (tipo!=3) {
+        imageMode(CORNER);
+        tint(200, 255, 100, 255);
+        image(tileSprites[0], x*l+xOffset, y*h+yOffset, l, h);
+        tint(255, 255, 255, 255);
+      } else {
+        noStroke();
+        fill(tiles[tipo-1]);
+        rect(x*l+xOffset, y*h+yOffset, l+1, h+1);
+      }
     }
   }
 }

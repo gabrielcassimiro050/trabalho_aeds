@@ -1,4 +1,4 @@
-class cItem {
+class item {
   PVector pos;
   int valor;
   PImage img;
@@ -12,11 +12,11 @@ class cItem {
   //5 Laranja -- Topázio
   //6 Roxo -- Ametista
   //7 Azul -- Safira
-  //8 Rosa -- Rosa de Cristal
+  //8 Rosa -- Flor de Cristal
   //9 Ciano -- Diamante
   //10 Indigo -- Cosmos
 
-  cItem() {
+  item() {
     img = new PImage();
     geraItem();
   }
@@ -32,20 +32,20 @@ class cItem {
 
   void geraItem() {
     PVector aux = posicaoAleatoria();
-    while (grid[(int)aux.x][(int)aux.y].type==2 || (aux.x == jogador.pos.x && aux.y == jogador.pos.y)) {
+    while (grid[(int)aux.x][(int)aux.y].type==2 || (aux.x == player.pos.x && aux.y == player.pos.y)) {
       aux = posicaoAleatoria();
     }
     pos = new PVector(aux.x, aux.y);
     valor = valorAleatorio();
     visivel = true;
-    if (valor >= 1 && valor<=itens.length) img = itens[valor-1];
+    if (valor >= 1 && valor<=itemSprites.length) img = itemSprites[valor-1];
   }
 
   void show() {
     if (visivel) {
       updateTiles();
       imageMode(CORNER);
-      image(img, pos.x*l+xOff, pos.y*h+cos(a)*2+yOff, l, h);
+      image(img, pos.x*l+xOffset, pos.y*h+cos(a)*2+yOffset, l, h);
       a+=.3;
     }
   }

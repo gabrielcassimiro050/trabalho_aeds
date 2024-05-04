@@ -1,13 +1,13 @@
-class cBotao {
+class botao {
   PVector pos;
-  PVector t; //Tamanho
+  PVector tamanho; //Tamanho
   String nome;
   boolean visivel;
   boolean click;
 
-  cBotao(float x, float y, float tx, float ty, boolean visivel, String nome) {
+  botao(float x, float y, float tx, float ty, boolean visivel, String nome) {
     pos = new PVector(x, y);
-    t = new PVector(tx, ty);
+    tamanho = new PVector(tx, ty);
     this.visivel = visivel;
     this.nome = nome;
   }

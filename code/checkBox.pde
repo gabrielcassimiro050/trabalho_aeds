@@ -1,11 +1,11 @@
-class cCheckbox {
+class checkBox {
   PVector pos;
   PVector t; //Tamanho
   String nome;
   boolean visivel;
   boolean click;
 
-  cCheckbox(float x, float y, float tx, float ty, boolean visivel, String nome) {
+  checkBox(float x, float y, float tx, float ty, boolean visivel, String nome) {
     pos = new PVector(x, y);
     t = new PVector(tx, ty);
     this.visivel = visivel;
