@@ -1,7 +1,7 @@
 class player {
   PVector pos;
   float a = 0;
-  float anim;
+  float animacao;
   int score = 0;
   inventario inventario;
 
@@ -47,7 +47,7 @@ class player {
     }
 
     //Aplica nova posição
-    if (grid[xC(x+dx)][yC(y+dy)].type != 2) {
+    if (grid[xC(x+dx)][yC(y+dy)].tipo != 2) {
       updateTiles();
       pos = new PVector(xC(x+dx), yC(y+dy));
       if (item.visivel && x == item.pos.x && y == item.pos.y) {
@@ -70,8 +70,8 @@ class player {
     if (flipped) scale(-1, 1);
     else scale(1, 1);
     rotate(sin(a)/100*pitch.analyze()/((r+c)/2));
-    image(playerSprite, 0, 0, l+anim*map(cos(a), -1, 1, 0, 1)/l, h+anim*map(cos(a), -1, 1, 0, 1)/h);
-    anim = pitch.analyze()/((r+c)/2);
+    image(playerSprite, 0, 0, l+animacao*map(cos(a), -1, 1, 0, 1)/l, h+animacao*map(cos(a), -1, 1, 0, 1)/h);
+    animacao = pitch.analyze()/((r+c)/2);
     popMatrix();
     a+=.3;
     if (abrirInventario) inventario.show();

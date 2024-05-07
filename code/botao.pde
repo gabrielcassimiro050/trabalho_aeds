@@ -17,14 +17,14 @@ class botao {
       if (click) fill(100);
       else fill(255);
       stroke(1);
-      rect(pos.x, pos.y, t.x, t.y);
+      rect(pos.x, pos.y, tamanho.x, tamanho.y);
       fill(0);
-      text(nome, pos.x+t.x/2.3, pos.y+30);
+      text(nome, pos.x+tamanho.x/2.3, pos.y+30);
     }
   }
 
   void clicked() {
-    if (visivel && mouseX>=pos.x && mouseX<=pos.x+t.x && mouseY>=pos.y && mouseY<=pos.y+t.y) {
+    if (visivel && mouseX>=pos.x && mouseX<=pos.x+tamanho.x && mouseY>=pos.y && mouseY<=pos.y+tamanho.y) {
       click = true;
     }
   }

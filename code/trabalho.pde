@@ -18,9 +18,11 @@ float seedRange = 10000; //Raio da seed
 float previewX, previewY; //Posição da preview
 float previewTamanhoX, previewTamanhoY; //Tamanho da preview
 
+//Faça o download da library Processing Sound para funcionar
 SoundFile musica;
 SoundFile[] coleta;
 PitchDetector pitch;
+
 PImage[] itemSprites;
 PImage[] tileSprites;
 PImage playerSprite;
@@ -58,7 +60,7 @@ int yC(int y) {
 //Implementação que permite adicionar outros obstáculos
 boolean checarColisao(int x, int y) {
   for (int i = 0; i < colisao.length; ++i) {
-    if (grid[x][y].type==colisao[i]) return false;
+    if (grid[x][y].tipo==colisao[i]) return false;
   }
   return true;
 }
@@ -68,7 +70,7 @@ tile[][] criarGrid() {
   for (int x = 0; x < r; ++x) {
     for (int y = 0; y < c; ++y) {
       aux[x][y] = new tile(x, y, random(1)<.9 ? 1 : 2); //Gera Árvores aleatórias
-      if (aux[x][y].type==1 && random(1)>.5 && mapaExpandido) aux[x][y] = new tile(x, y, (int)map(round(noise(x*escala, y*escala, seed)), 0, 1, 1, 2)); //Gera uma camada de noise
+      if (aux[x][y].tipo==1 && random(1)>.5 && mapaExpandido) aux[x][y] = new tile(x, y, (int)map(round(noise(x*escala, y*escala, seed)), 0, 1, 1, 2)); //Gera uma camada de noise
       if (dist(x*l, y*h, round(r/2.0)*l, round(c/2.0)*h)<log(width+height)*10) aux[x][y] = new tile(x, y, 1); //Limpa área ao redor do personagem
     }
   }
@@ -84,13 +86,13 @@ void descobreVazios(int x, int y, int t) {
   if (t<(r*2+c*2)*2) {
     ++t;
     for (int i = -1; i <= 1; ++i) {
-      if (grid[xC(x+i)][y].type != 2 && grid[xC(x+i)][y].type != 4) {
+      if (grid[xC(x+i)][y].tipo != 2 && grid[xC(x+i)][y].tipo != 4) {
         grid[xC(x+i)][y] = new tile(xC(x+i), y, 4); //Adiciona Aux a todo tile de Grama
         descobreVazios(xC(x+i), y, t);  //Chama a função com essa nova posição
       }
     }
     for (int i = -1; i <= 1; ++i) {
-      if (grid[x][yC(y+i)].type != 2 && grid[x][yC(y+i)].type != 4) {
+      if (grid[x][yC(y+i)].tipo != 2 && grid[x][yC(y+i)].tipo != 4) {
         grid[x][yC(y+i)] = new tile(x, yC(y+i), 4); //Adiciona Aux a todo tile de Grama
         descobreVazios(x, yC(y+i), t);  //Chama a função com essa nova posição
       }
@@ -106,11 +108,11 @@ void preparaGrid() {
   for (int x = 0; x < r; ++x) {
     for (int y = 0; y < c; ++y) {
       if (mapaExpandido) {
-        if (grid[x][y].type == 1) grid[x][y] = new tile(x, y, 2); //Troca Grama por Árvore
-        if (grid[x][y].type == 4) grid[x][y] = new tile(x, y, 1); //Troca Aux por Grama
+        if (grid[x][y].tipo == 1) grid[x][y] = new tile(x, y, 2); //Troca Grama por Árvore
+        if (grid[x][y].tipo == 4) grid[x][y] = new tile(x, y, 1); //Troca Aux por Grama
       }
       if (dist(x*l, y*h, floor(r/2.0)*l, floor(c/2.0)*h)<log(width+height)*10) grid[x][y] = new tile(x, y, 3); //Adiciona Terra ao redor do centro
-      if (grid[x][y].type == 1) grid[x][y] = new tile(x, y, round(noise(x*escala, y*escala, seedAux))==0 ? 1 : 3); //Adiciona uma camada de noise de Terra
+      if (grid[x][y].tipo == 1) grid[x][y] = new tile(x, y, round(noise(x*escala, y*escala, seedAux))==0 ? 1 : 3); //Adiciona uma camada de noise de Terra
     }
   }
 }
@@ -145,7 +147,6 @@ int valorAleatorio() {
 PVector posicaoAleatoria() {
   return new PVector(floor(random(r)), floor(random(c)));
 }
-
 
 //Transforma ms em s
 int segundos(long i, long f) {
@@ -529,7 +530,7 @@ void draw() {
       for (int x = 0; x < r; ++x) {
         for (int y = 0; y < c; ++y) {
           noStroke();
-          fill(tiles[grid[x][y].type-1]);
+          fill(tiles[grid[x][y].tipo-1]);
           rect(previewX+x*previewL+previewXOffset, previewY+y*previewH+previewYOffset, previewL, previewH);
         }
       }

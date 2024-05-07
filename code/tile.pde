@@ -2,8 +2,6 @@ class tile{
   PVector pos;
   int tipo;
 
-
-
   tile(int x, int y, int tipo) {
     this.pos = new PVector(x, y);
     this.tipo = tipo;

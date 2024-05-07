@@ -1,6 +1,6 @@
 class menu {
   PVector pos;
-  PVector t; //Tamanho
+  PVector tamanho; //Tamanho
   boolean visivel;
   Lista<botao> botoes; //Trocar por lista depois
   Lista<checkBox> checkBoxes;
@@ -8,7 +8,7 @@ class menu {
   
   menu(float x, float y, float tx, float ty, boolean visivel){
     pos = new PVector(x, y);
-    t = new PVector(tx, ty);
+    tamanho = new PVector(tx, ty);
     botoes = new Lista<botao>();
     checkBoxes = new Lista<checkBox>();
     textBoxes = new Lista<textBox>();
@@ -50,7 +50,7 @@ class menu {
   
   void show(){
     fill(255);
-    rect(pos.x, pos.y, t.x, t.y);
+    rect(pos.x, pos.y, tamanho.x, tamanho.y);
     for(int i = 0; i < botoes.size(); ++i){
       botoes.get(i).show();
     }

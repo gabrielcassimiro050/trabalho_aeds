@@ -32,7 +32,7 @@ class item {
 
   void geraItem() {
     PVector aux = posicaoAleatoria();
-    while (grid[(int)aux.x][(int)aux.y].type==2 || (aux.x == player.pos.x && aux.y == player.pos.y)) {
+    while (grid[(int)aux.x][(int)aux.y].tipo==2 || (aux.x == player.pos.x && aux.y == player.pos.y)) {
       aux = posicaoAleatoria();
     }
     pos = new PVector(aux.x, aux.y);
