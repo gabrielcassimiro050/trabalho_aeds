@@ -12,7 +12,17 @@ class inventario {
   int getItem(int index) {
     return inventario.get(index);
   }
-
+  
+  void sortInventario(){
+    for(int i = inventario.size(); i >= 0; --i){
+      for(int j = 0; j < i-1; ++j){
+        if(inventario.get(j)<inventario.get(j+1)){
+          inventario.swap(j, j+1);
+        }
+      }
+    }
+  }
+  
   void show() {
     fill(100, 10);
     noStroke();

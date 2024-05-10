@@ -5,21 +5,32 @@ class botao {
   boolean visivel;
   boolean click;
 
-  botao(float x, float y, float tx, float ty, boolean visivel, String nome) {
+  PImage img;
+  boolean hasImage;
+
+  botao(float x, float y, float tx, float ty, boolean visivel, String nome, PImage img, boolean hasImage) {
     pos = new PVector(x, y);
     tamanho = new PVector(tx, ty);
     this.visivel = visivel;
     this.nome = nome;
+    this.img = img;
+    this.hasImage = hasImage;
   }
 
   void show() {
     if (visivel) {
-      if (click) fill(100);
-      else fill(255);
-      stroke(1);
-      rect(pos.x, pos.y, tamanho.x, tamanho.y);
-      fill(0);
-      text(nome, pos.x+tamanho.x/2.3, pos.y+30);
+      if (hasImage) {
+        if (click) tint(100, 255);
+        else tint(255, 255);
+        image(img, pos.x, pos.y, tamanho.x, tamanho.y);
+      } else {
+        if (click) fill(100);
+        else fill(255);
+        stroke(1);
+        rect(pos.x, pos.y, tamanho.x, tamanho.y);
+        fill(0);
+        text(nome, pos.x+tamanho.x/2.3, pos.y+30);
+      }
     }
   }
 

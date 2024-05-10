@@ -15,8 +15,8 @@ class menu {
     this.visivel = visivel;
   }
   
-  void addBotao(float x, float y, float tx, float ty, boolean visivel, String nome){
-      botoes.add(new botao(x, y, tx, ty, visivel, nome));
+  void addBotao(float x, float y, float tx, float ty, boolean visivel, String nome, PImage img, boolean hasImage){
+      botoes.add(new botao(x, y, tx, ty, visivel, nome, img, hasImage));
   }
   
   void addcheckBox(float x, float y, float tx, float ty, boolean visivel, String nome){
@@ -49,7 +49,8 @@ class menu {
   }
   
   void show(){
-    fill(255);
+    noStroke();
+    fill(#0C1B3B);
     rect(pos.x, pos.y, tamanho.x, tamanho.y);
     for(int i = 0; i < botoes.size(); ++i){
       botoes.get(i).show();
