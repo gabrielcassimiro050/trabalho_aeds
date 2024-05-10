@@ -9,7 +9,7 @@ int tempoFrame = 0, frame = floor(10/floor(log(r+c)));
 
 int tempo = 0; //Tempo desde do início do jogo
 int tempoGame = 0; //Tempo em jogo
-int tempoMax = 20; //Tempo máximo de jogo
+int tempoMax = 120; //Tempo máximo de jogo
 
 float escala = .1; //Escala do Noise
 float seed; //Seed do Noise
@@ -19,7 +19,7 @@ float previewX, previewY; //Posição da preview
 float previewTamanhoX, previewTamanhoY; //Tamanho da preview
 
 //Faça o download da library Processing Sound para funcionar
-SoundFile musica;
+SoundFile musica, musicaFinal;
 SoundFile[] coleta;
 PitchDetector pitch;
 
@@ -48,7 +48,8 @@ long instanteInicial, fim;
 
 int colisao[] = {2}; //Árvore
 
-
+color bg = #060139; //Background
+float animacaoInicial = 0;
 
 //Garantem que as coordenadas estejam dentro da grid
 int xC(int x) {
@@ -74,7 +75,7 @@ tile[][] criarGrid() {
     for (int y = 0; y < c; ++y) {
       aux[x][y] = new tile(x, y, random(1)<.9 ? random(1)>.8 ? 1 : 0 : 2); //Gera Árvores aleatórias
       if ((aux[x][y].tipo==1 || aux[x][y].tipo==0) && random(1)>.5 && mapaExpandido) aux[x][y] = new tile(x, y, (int)map(round(noise(x*escala, y*escala, seed)), 0, 1, 0, 2)); //Gera uma camada de noise
-      if (dist(x*l, y*h, round(r/2.0)*l, round(c/2.0)*h)<log(width+height)*10) aux[x][y] = new tile(x, y, 1); //Limpa área ao redor do personagem
+      if (dist(x*l+l/2.0, y*h+h/2.0, width/2.0, height/2.0)<=log(width+height)*10) aux[x][y] = new tile(x, y, 1); //Limpa área ao redor do personagem
     }
   }
   return aux;
@@ -114,7 +115,7 @@ void preparaGrid() {
         if (grid[x][y].tipo == 1 || grid[x][y].tipo == 0) grid[x][y] = new tile(x, y, 2); //Troca Grama por Árvore
         if (grid[x][y].tipo == 4) grid[x][y] = new tile(x, y, random(1)>.8 ? 1 : 0); //Troca Aux por Grama
       }
-      if (dist(x*l, y*h, floor(r/2.0)*l, floor(c/2.0)*h)<log(width+height)*10) grid[x][y] = new tile(x, y, 3); //Adiciona Terra ao redor do centro
+      if (dist(x*l+l/2.0, y*h+h/2.0, width/2.0, height/2.0)<=log(width+height)*10) grid[x][y] = new tile(x, y, 3); //Adiciona Terra ao redor do centro
       if (grid[x][y].tipo == 1 || grid[x][y].tipo == 0) grid[x][y] = new tile(x, y, round(noise(x*escala, y*escala, seedAux))==0 ? random(1)>.8 ? 1 : 0 : 3); //Adiciona uma camada de noise de Terra
     }
   }
@@ -131,7 +132,7 @@ void geraGrid() {
 
 //Mostra a grid
 void showGrid() {
-  background(#0C1B3B);
+  background(bg);
   for (int x = 0; x < r; ++x) {
     for (int y = 0; y < c; ++y) {
       grid[x][y].show();
@@ -268,6 +269,8 @@ void keyReleased() {
         textBox.txt = Integer.valueOf(textBox.txt)<=250 ? textBox.txt : "250";
         if (textBox.nome.equals("R")) r = Integer.valueOf(textBox.txt);
         if (textBox.nome.equals("C")) c = Integer.valueOf(textBox.txt);
+        String aux = textBox.nome+": ";
+        textBox.txt = aux.concat(textBox.txt);
         l = width/(float)r;
         h = height/(float)c;
         geraGrid();
@@ -341,7 +344,7 @@ void mouseReleased() {
       menuInicial.visivel = false;
       menuStart.visivel = true;
       game.click = false;
-      background(#0C1B3B);
+      background(bg);
     }
     if (sair.click) {
       exit();
@@ -358,7 +361,7 @@ void mouseReleased() {
 
     if (start.click) {
       menuStart.visivel = false;
-      background(#0C1B3B);
+      background(bg);
       imageMode(CENTER);
       image(telaDeCarregamento, width/2.0, height/2.0, 320, 160);
       game = true;
@@ -369,7 +372,7 @@ void mouseReleased() {
       menuStart.visivel = false;
       menuInicial.visivel = true;
       voltar.click = false;
-      background(#0C1B3B);
+      background(bg);
     }
 
     if (expandido.click) {
@@ -395,13 +398,13 @@ void mouseReleased() {
 
 void setup() {
   size(750, 750);
-  background(#0C1B3B);
+  background(bg);
 
   //Tela de Loading Inicial
   rectMode(CENTER);
   rect(width/2.0, height/2.0, width/4.0, width/4.0);
   rectMode(CORNER);
-
+  
   //Carrega os sprites dos botões
   play = new PImage();
   play = loadImage("play.png");
@@ -422,21 +425,22 @@ void setup() {
   previewTamanhoY = mundoTamanhoY/2.5;
 
   //Define o menu Inicial
-  menuInicial = new menu(mundoX, mundoY, mundoTamanhoX, mundoTamanhoY, true);
-  menuInicial.addBotao(mundoX, 3*mundoY, mundoTamanhoX, mundoTamanhoY/4.0, true, "Game", play, true);
-  menuInicial.addBotao(mundoX, 3*mundoY+mundoTamanhoY/3.0, mundoTamanhoX, mundoTamanhoY/4.0, true, "Sair", exit, true);
+  float inicialX = (width-width/2.0)/2.0, inicialY = height/1.7;
+  menuInicial = new menu(inicialX, inicialY, width/4.0, height/4.0, true);
+  menuInicial.addBotao(inicialX, inicialY, width/2.0, height/8.0, true, "Game", play);
+  menuInicial.addBotao(inicialX, inicialY+height/6.0, width/2.0, height/8.0, true, "Sair", exit);
 
   //Define o menu de Start e seus acessórios se baseando na posição da preview
   menuStart = new menu(mundoX, mundoY, mundoTamanhoX, mundoTamanhoY, false);
-  menuStart.addBotao(previewX, previewY, previewX+r*(previewX/previewTamanhoX), previewY+c*(previewY/previewTamanhoY), false, "Mundo", null, false); //Placeholder da preview
+  menuStart.addBotao(previewX, previewY, previewX+r*(previewX/previewTamanhoX), previewY+c*(previewY/previewTamanhoY), false, "Mundo", null); //Placeholder da preview
   menuStart.addcheckBox(previewX, previewY+5*mundoTamanhoY/12.0, mundoTamanhoX/2.5, mundoTamanhoY/10.0, true, "Expandido");
-  menuStart.addBotao(previewX, previewY+31*mundoTamanhoY/60.0, mundoTamanhoX/2.5, mundoTamanhoY/10.0, true, "Random Seed", null, false);
+  menuStart.addBotao(previewX, previewY+31*mundoTamanhoY/60.0, mundoTamanhoX/2.5, mundoTamanhoY/10.0, true, "Random Seed", null);
 
-  menuStart.addtextBox(previewX, previewY+37*mundoTamanhoY/60.0, mundoTamanhoX/2.5, mundoTamanhoY/10.0, true, "R", "10");
-  menuStart.addtextBox(previewX, previewY+43*mundoTamanhoY/60.0, mundoTamanhoX/2.5, mundoTamanhoY/10.0, true, "C", "10");
+  menuStart.addtextBox(previewX, previewY+37*mundoTamanhoY/60.0, mundoTamanhoX/2.5, mundoTamanhoY/10.0, true, "R", "R: 10");
+  menuStart.addtextBox(previewX, previewY+43*mundoTamanhoY/60.0, mundoTamanhoX/2.5, mundoTamanhoY/10.0, true, "C", "C: 10");
 
-  menuStart.addBotao(previewX+mundoTamanhoX/2.0, mundoY+31*mundoTamanhoY/40.0-10, mundoTamanhoX/2.5, mundoTamanhoY/10.0, true, "Start", null, false);
-  menuStart.addBotao(previewX+mundoTamanhoX/2.0, mundoY+7*mundoTamanhoY/8.0, mundoTamanhoX/2.5, mundoTamanhoY/10.0, true, "Voltar", null, false);
+  menuStart.addBotao(previewX+mundoTamanhoX/2.0, mundoY+31*mundoTamanhoY/40.0-10, mundoTamanhoX/2.5, mundoTamanhoY/10.0, true, "Start", null);
+  menuStart.addBotao(previewX+mundoTamanhoX/2.0, mundoY+7*mundoTamanhoY/8.0, mundoTamanhoX/2.5, mundoTamanhoY/10.0, true, "Voltar", null);
 
   //Cria o que servirá para a preview inicial
   geraGrid();
@@ -445,6 +449,7 @@ void setup() {
 
   //Carrega os sons
   musica = new SoundFile(this, "music.mp3");
+  musicaFinal = new SoundFile(this, "end_music.mp3");
   coleta = new SoundFile[2];
   for (int i = 0; i < coleta.length; ++i) coleta[i] = new SoundFile(this, "collect_"+i+".mp3");
 
@@ -452,10 +457,13 @@ void setup() {
   telaDeCarregamento = new PImage();
   telaDeCarregamento = loadImage("loading.png");
 
-
   //Carrega player
   playerSprite = new PImage();
   playerSprite = loadImage("ladrao.png");
+
+  //Carrega os sprites dos itemSprites
+  itemSprites = new PImage[10];
+  for (int i = 0; i < itemSprites.length; ++i) itemSprites[i] = loadImage("item_"+i+".png");
 
   //Carrega fonte
   pixelFont = createFont("Minecraft.ttf", 20);
@@ -476,14 +484,10 @@ void draw() {
 
     //Carregamento
     if (loading) {
-      background(#0C1B3B);
+      background(bg);
       int x = floor(r/2.0);
       int y = floor(c/2.0);
       player = new player(new PVector(x, y));
-
-      //Carrega os sprites dos itemSprites
-      itemSprites = new PImage[10];
-      for (int i = 0; i < itemSprites.length; ++i) itemSprites[i] = loadImage("item_"+i+".png");
       item = new item();
 
       //Carrega os sprites dos tiles
@@ -537,7 +541,10 @@ void draw() {
     }
 
     //Checa se o jogo ainda não acabou
-    if (tempoMax-tempoGame<=0 && contando) game = false;
+    if (tempoMax-tempoGame<=0 && contando) {
+      player.animacao = 0;
+      game = false;
+    }
 
     //Mostra o player e o item
     if (!player.abrirInventario) item.show();
@@ -560,8 +567,6 @@ void draw() {
       text(nf(player.score, 4), width-width/10.0, height-height/20.0);
     }
 
-
-
     //Conta os segundos
     long instanteAtual = millis();
     if (segundos(instanteInicial, instanteAtual)-segundos(instanteInicial, fim)==1) {
@@ -574,13 +579,29 @@ void draw() {
 
     ++tempoFrame;
   } else {
-    if (menuInicial.visivel) menuInicial.show();
+    if (menuInicial.visivel) {
+      background(bg);
+      menuInicial.show();
+      imageMode(CENTER);
+      pushMatrix();
+      translate(width/2.5, height/2.5);
+      rotate(radians(10));
+      image(playerSprite, 0, sin(animacaoInicial)*5, width/3.5, height/3.5);
+      image(itemSprites[2], width/3, -height/5+sin(animacaoInicial-10)*5, width/10, height/10);
+      image(itemSprites[8], width/8, -height/4+sin(animacaoInicial-20)*5, width/7, height/7);
+      popMatrix();
+      imageMode(CORNER);
+      animacaoInicial += .2;
+    }
+
     if (menuStart.visivel) {
+      background(bg);
       menuStart.show();
       showPreview();
     }
-    
-    if(tempoGame>=tempoMax){
+
+    if (tempoGame>=tempoMax) {
+      musica.stop();
       playerSprite = loadImage("ladrao_cansado.png");
       player.inventario.sortInventario();
       player.abrirInventario = true;

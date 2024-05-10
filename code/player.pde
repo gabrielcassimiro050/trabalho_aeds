@@ -74,12 +74,31 @@ class player {
       image(playerSprite, 0, 0, l+animacao*map(cos(a), -1, 1, 0, 1)/l, h+animacao*map(cos(a), -1, 1, 0, 1)/h);
       animacao = pitch.analyze()/((r+c)/2);
       a+=.3;
-    }else{
-      image(playerSprite, 0, 0, l+map(cos(a), -1, 1, 0, 1)*5, h+map(sin(a), -1, 1, 0, 1)*5);
+    } else {
+      if (animacao<=1) {
+        image(playerSprite, 0, 0, l+map(cos(a), -1, 1, 0, 1)*animacao, h+map(sin(a), -1, 1, 0, 1)*animacao);
+      } else {
+        if (animacao<1.5) {
+          playerSprite = loadImage("ladrao.png");
+          image(playerSprite, 0, 0, l+animacao*map(cos(a), -1, 1, 0, 1)/l, h+animacao*map(cos(a), -1, 1, 0, 1)/h);
+        } else if (animacao<1.7) {
+          image(playerSprite, 0, 0, l+map(cos(a), -1, 1, 0, 1)*animacao, h+map(sin(a), -1, 1, 0, 1)*animacao);
+        } else if (animacao<2) {
+          image(playerSprite, 0, 0, l+animacao*map(cos(a), -1, 1, 0, 1)/l, h+animacao*map(cos(a), -1, 1, 0, 1)/h);
+        } else {
+          image(playerSprite, 0, 0, l+map(cos(a), -1, 1, 0, 1)*animacao, h+map(sin(a), -1, 1, 0, 1)*animacao);
+        }
+      }
+      if (animacao<=2) {
+        animacao+=.1;
+      } else {
+        if (!musicaFinal.isPlaying()) musicaFinal.play();
+      }
+
       a+=.5;
     }
     popMatrix();
-    
+
     if (abrirInventario) inventario.show();
   }
 }

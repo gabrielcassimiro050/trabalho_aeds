@@ -27,9 +27,11 @@ class inventario {
     fill(100, 10);
     noStroke();
     rect(0, 0, width, height);
+    float n = 6;
+    float x = width/n;
+    float y = height/n;
     for (int i = 0; i < inventario.size(); ++i) {
-      float sx = width/100;
-      image(itemSprites[inventario.get(i)-1], 100*((i+sx)%sx)+50, 100*(floor(i/sx))+50, 100, 100);
+      image(itemSprites[inventario.get(i)-1], x*((i+n)%n)+x/2.0, x*(floor(i/n))+y/2.0, y, y);
     } 
   }
 }
