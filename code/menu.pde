@@ -19,12 +19,12 @@ class menu {
       botoes.add(new botao(x, y, tx, ty, visivel, nome, img));
   }
   
-  void addcheckBox(float x, float y, float tx, float ty, boolean visivel, String nome){
-      checkBoxes.add(new checkBox(x, y, tx, ty, visivel, nome));
+  void addcheckBox(float x, float y, float tx, float ty, boolean visivel, String nome, PImage imgUnchecked, PImage imgChecked){
+      checkBoxes.add(new checkBox(x, y, tx, ty, visivel, nome, imgUnchecked, imgChecked));
   }
   
-  void addtextBox(float x, float y, float tx, float ty, boolean visivel, String nome, String txt){
-      textBoxes.add(new textBox(x, y, tx, ty, visivel, nome, txt));
+  void addtextBox(float x, float y, float tx, float ty, boolean visivel, String nome, String txt, PImage img){
+      textBoxes.add(new textBox(x, y, tx, ty, visivel, nome, txt, img));
   }
   
   botao getBotao(String botao){
@@ -49,9 +49,9 @@ class menu {
   }
   
   void show(){
-    noStroke();
-    fill(bg);
-    rect(pos.x, pos.y, tamanho.x, tamanho.y);
+    //noStroke();
+    //fill(bg);
+    //rect(pos.x, pos.y, tamanho.x, tamanho.y);
     for(int i = 0; i < botoes.size(); ++i){
       botoes.get(i).show();
     }
