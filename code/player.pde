@@ -32,22 +32,22 @@ class player {
 
     //Checa se os espaços são válidos
     if (right && checarColisao(xC(x+1), y)) {
-      dx = 1;
+      dx += 1;
       flipped = true;
     }
     if (left && checarColisao(xC(x-1), y)) {
-      dx = -1;
+      dx += -1;
       flipped = false;
     }
     if (down && checarColisao(x, yC(y+1))) {
-      dy = 1;
+      dy += 1;
     }
     if (up && checarColisao(x, yC(y-1))) {
-      dy = -1;
+      dy += -1;
     }
 
     //Aplica nova posição
-    if (grid[xC(x+dx)][yC(y+dy)].tipo != 2) {
+    if (checarColisao(xC(x+dx), yC(y+dy))) {
       updateTiles();
       pos = new PVector(xC(x+dx), yC(y+dy));
       if (item.visivel && x == item.pos.x && y == item.pos.y) {
@@ -93,6 +93,7 @@ class player {
         animacao+=.1;
       } else {
         if (!musicaFinal.isPlaying()) musicaFinal.play();
+        fim = true;
       }
 
       a+=.5;

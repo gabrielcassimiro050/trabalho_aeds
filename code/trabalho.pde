@@ -9,7 +9,7 @@ int tempoFrame = 0, frame = floor(10/floor(log(r+c)));
 
 int tempo = 0; //Tempo desde do início do jogo
 int tempoGame = 0; //Tempo em jogo
-int tempoMax = 120; //Tempo máximo de jogo
+int tempoMax = 1; //Tempo máximo de jogo
 
 float escala = .1; //Escala do Noise
 float seed; //Seed do Noise
@@ -31,6 +31,7 @@ PImage play, exit;
 PImage playerSprite;
 PImage telaDeCarregamento;
 PImage placarDeTempo, placarDePontuacao;
+PImage moldura, molduraPontuacao;
 PFont pixelFont;
 
 player player;
@@ -43,8 +44,9 @@ boolean mapaExpandido = false;
 boolean game = false;
 boolean loading = true;
 boolean paused = false;
+boolean fim = false;
 
-long instanteInicial, fim;
+long instanteInicial, instanteFinal;
 
 int colisao[] = {2}; //Árvore
 
@@ -74,7 +76,7 @@ tile[][] criarGrid() {
   for (int x = 0; x < r; ++x) {
     for (int y = 0; y < c; ++y) {
       aux[x][y] = new tile(x, y, random(1)<.9 ? random(1)>.8 ? 1 : 0 : 2); //Gera Árvores aleatórias
-      if ((aux[x][y].tipo==1 || aux[x][y].tipo==0) && random(1)>.5 && mapaExpandido) aux[x][y] = new tile(x, y, (int)map(round(noise(x*escala, y*escala, seed)), 0, 1, 0, 2)); //Gera uma camada de noise
+      if ((aux[x][y].tipo==1 || aux[x][y].tipo==0) && random(1)>.5 && mapaExpandido) aux[x][y] = new tile(x, y, (int)map(round(noise(x*escala, y*escala, seed)), 0, 1, 0, 2)); //Gera uma camada de noise de árvores
       if (dist(x*l+l/2.0, y*h+h/2.0, width/2.0, height/2.0)<=log(width+height)*10) aux[x][y] = new tile(x, y, 1); //Limpa área ao redor do personagem
     }
   }
@@ -404,7 +406,7 @@ void setup() {
   rectMode(CENTER);
   rect(width/2.0, height/2.0, width/4.0, width/4.0);
   rectMode(CORNER);
-  
+
   //Carrega os sprites dos botões
   play = new PImage();
   play = loadImage("play.png");
@@ -474,7 +476,7 @@ void setup() {
   musica.loop();
 
   instanteInicial = millis();
-  fim = 0;
+  instanteFinal = 0;
 
   loading = true;
 }
@@ -502,8 +504,12 @@ void draw() {
       //Carrega os sprites do tempo e score
       placarDeTempo = new PImage();
       placarDePontuacao = new PImage();
+      moldura = new PImage();
+      molduraPontuacao = new PImage();
       placarDeTempo = loadImage("time.png");
       placarDePontuacao = loadImage("score.png");
+      moldura = loadImage("frame.png");
+      molduraPontuacao = loadImage("frameScore.png");
 
       //Define e coloca input no PitchDetector (Detecta a nota fundamental)
       //Serve para que o personagem se balançe no ritmo da música
@@ -569,13 +575,13 @@ void draw() {
 
     //Conta os segundos
     long instanteAtual = millis();
-    if (segundos(instanteInicial, instanteAtual)-segundos(instanteInicial, fim)==1) {
+    if (segundos(instanteInicial, instanteAtual)-segundos(instanteInicial, instanteFinal)==1) {
       ++tempo;
       contando = false;
     } else {
       contando = true;
     }
-    fim = millis();
+    instanteFinal = millis();
 
     ++tempoFrame;
   } else {
@@ -604,8 +610,38 @@ void draw() {
       musica.stop();
       playerSprite = loadImage("ladrao_cansado.png");
       player.inventario.sortInventario();
-      player.abrirInventario = true;
+      //player.abrirInventario = true;
       player.show();
+
+      if (fim) {
+        fill(#82441a);
+        rect((width-width/1.35)/2.0, (height-height/1.35)/2.0, width/1.35, height/1.35, 25);
+
+        float x = (width-width/1.5)/2.0;
+        float y = (height-height/1.5)/2.0;
+
+        fill(#ffb583);
+        rect((width-width/1.5)/2.0, (height-height/1.5)/2.0, width/1.5, height/1.5);
+
+        int[] aux = player.inventario.retornaQuantidade();
+
+        for (int i = 0; i < 10; ++i) {
+          image(moldura, x+(width/10.0+x/10.0)*((i+2)%2)+x/2.0, x+(width/10.0+x/10.0)*(floor(i/2))+y/2.0, width/10.0, height/10.0);
+        }
+
+        for (int i = itemSprites.length-1; i >= 0; --i) {
+          image(itemSprites[i], x+(width/10.0+x/10.0)*((i+2)%2)+x/2.0, x+(width/10.0+x/10.0)*(floor(i/2))+y/2.0, width/10.0, height/10.0);
+          fill(255);
+          textSize(21);
+          text(aux[i]+"x", x+(width/10.0+x/10.0)*((i+2)%2)+x/2.0+width/25.0, x+(width/10.0+x/10.0)*(floor(i/2))+y/2.0+height/22.0, width/10.0, height/10.0);
+          textSize(20);
+        }
+        fill(#e6955e);
+        image(molduraPontuacao, (width-width/1.5)/2.0+width/1.5/1.4, (height-height/1.5)/4.0+height/5.0, width/1.5/2.0, height/1.5/4.0);
+        fill(255);
+        textSize(45);
+        text(nf(player.score, 4), (width-width/1.5)/4.0+width/1.5/1.35, (height-height/1.5)/4.0+height/4.5);
+      }
     }
   }
 }
