@@ -437,7 +437,7 @@ void setup() {
 
   tempo = 0;
   tempoGame = 0;
-  tempoMax = 1;
+  tempoMax = 120;
 
   //Tela de Loading Inicial
   noStroke();
