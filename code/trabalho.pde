@@ -342,6 +342,7 @@ void mousePressed() {
   }
 
   restart.clicked();
+  exit.clicked();
 }
 
 void mouseReleased() {
